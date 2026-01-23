@@ -1,0 +1,32 @@
+{
+  "last_updated": "2026-01-23 19:14:38",
+  "games": [
+    {
+      "name": "Finnish Lotto",
+      "jackpot": 16000000.0,
+      "price": 1.0,
+      "next_draw": "2026-01-24 22:05",
+      "odds_jackpot": 18643560,
+      "base_rtp": 0.23,
+      "currency": "\u20ac"
+    },
+    {
+      "name": "Vikinglotto",
+      "jackpot": 6400000.0,
+      "price": 1.0,
+      "next_draw": "2026-01-28 21:00",
+      "odds_jackpot": 61357560,
+      "base_rtp": 0.25,
+      "currency": "\u20ac"
+    },
+    {
+      "name": "Eurojackpot",
+      "jackpot": 52000000.0,
+      "price": 2.0,
+      "next_draw": "2026-01-23 21:45",
+      "odds_jackpot": 139838160,
+      "base_rtp": 0.32,
+      "currency": "\u20ac"
+    }
+  ]
+}
