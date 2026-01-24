@@ -3,6 +3,7 @@ name: Update Lottery Data
 on:
   schedule:
     - cron: '*/15 * * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
