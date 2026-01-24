@@ -58,6 +58,16 @@ def _parse_money(value):
     except ValueError:
         return None
 
+def _first_list_item(payload):
+    if isinstance(payload, list):
+        return payload[0] if payload else None
+    if isinstance(payload, dict):
+        for key in ("data", "results", "draws"):
+            items = payload.get(key)
+            if isinstance(items, list) and items:
+                return items[0]
+    return None
+
 def fetch_game_data(game_id):
     url = f"https://www.veikkaus.fi/api/draw-open-games/v1/games/{game_id}/draws"
     headers = {"User-Agent": "Mozilla/5.0 (LottoBot/1.0)"}
@@ -107,22 +117,21 @@ def fetch_international_data():
     # 2. MEGA MILLIONS (Source: NY State Gov API)
     mm_url = "https://data.ny.gov/resource/5xaw-6ayf.json?$order=draw_date DESC&$limit=1"
 
-    # 3. EURO MILLIONS (Third-party, fallback-only)
-    em_url = "https://www.lottery.net/api/game/euromillions"
+    # 3. EURO MILLIONS (Third-party API)
+    em_url = "https://euromillions.api.pedromealha.dev/v1/draws?limit=1"
 
     try:
         # --- FETCH POWERBALL ---
-        pb_data = _safe_get(pb_url)[0]
+        pb_data = _first_list_item(_safe_get(pb_url))
+        if not pb_data:
+            raise ValueError("No Powerball data returned")
         jackpot = (
             _parse_money(pb_data.get("jackpot")) or
             _parse_money(pb_data.get("estimated_jackpot")) or
             _parse_money(pb_data.get("jackpot_amount"))
         )
         if jackpot is None:
-            us_data = _safe_get(
-                "https://www.lottery.net/api/stats/us-powerball-accumulated-jackpot"
-            )
-            jackpot = _parse_money(us_data.get("jackpot")) or 20_000_000
+            raise ValueError("No Powerball jackpot in NY data")
 
         results.append({
             "name": NAMES["POWERBALL"],
@@ -138,17 +147,16 @@ def fetch_international_data():
 
     try:
         # --- FETCH MEGA MILLIONS ---
-        mm_data = _safe_get(mm_url)[0]
+        mm_data = _first_list_item(_safe_get(mm_url))
+        if not mm_data:
+            raise ValueError("No Mega Millions data returned")
         jackpot = (
             _parse_money(mm_data.get("jackpot")) or
             _parse_money(mm_data.get("estimated_jackpot")) or
             _parse_money(mm_data.get("jackpot_amount"))
         )
         if jackpot is None:
-            us_data = _safe_get(
-                "https://www.lottery.net/api/stats/us-mega-millions-accumulated-jackpot"
-            )
-            jackpot = _parse_money(us_data.get("jackpot")) or 20_000_000
+            raise ValueError("No Mega Millions jackpot in NY data")
 
         results.append({
             "name": NAMES["MEGAMILLIONS"],
@@ -165,14 +173,28 @@ def fetch_international_data():
     try:
         # --- FETCH EUROMILLIONS ---
         em_data = _safe_get(em_url)
-        jackpot = _parse_money(em_data.get("jackpot"))
-        next_draw = em_data.get("next_draw") or em_data.get("nextDraw")
+        em_draw = _first_list_item(em_data) or em_data
+        jackpot = (
+            _parse_money(em_draw.get("jackpot")) or
+            _parse_money(em_draw.get("jackpot_amount")) or
+            _parse_money(em_draw.get("jackpot_eur")) or
+            _parse_money(em_draw.get("jackpotEur"))
+        )
+        next_draw = (
+            em_draw.get("next_draw") or
+            em_draw.get("nextDraw") or
+            em_draw.get("next_draw_date") or
+            em_draw.get("nextDrawDate") or
+            em_draw.get("draw_date") or
+            em_draw.get("drawDate") or
+            em_draw.get("date")
+        )
 
         if jackpot is not None:
             results.append({
                 "name": NAMES["EUROMILLIONS"],
                 "jackpot": jackpot,
-                "price": em_data.get("ticket_price") or 2.50,
+                "price": em_draw.get("ticket_price") or em_draw.get("ticketPrice") or 2.50,
                 "next_draw": next_draw,
                 "odds_jackpot": ODDS_CONFIG["EUROMILLIONS"],
                 "base_rtp": RTP_CONFIG["EUROMILLIONS"],
