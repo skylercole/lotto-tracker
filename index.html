@@ -46,6 +46,9 @@
         .stat-row:last-child { border: none; }
         .label { color: #888; }
         .timestamp { margin-top: 40px; color: #555; font-size: 0.8rem; }
+        .footer { margin-top: 24px; font-size: 0.85rem; color: #666; }
+        .footer a { color: #8ab4f8; text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -64,8 +67,16 @@
         <p>Loading market data...</p>
     </div>
     <div class="timestamp" id="last-updated"></div>
+    <div class="footer">
+        <a id="feedback-link" href="#" target="_blank" rel="noopener">Leave feedback</a>
+    </div>
 
     <script>
+        // Google Forms (replace with your live form URLs)
+        const FEEDBACK_FORM_URL = "https://forms.gle/jWRDuhSsNjv4ESK76";
+        // Privacy-friendly analytics (replace with your GoatCounter URL)
+        const GOATCOUNTER_URL = "https://thracion.goatcounter.com/count";
+
         async function loadData() {
             try {
                 // TRICK: Add "?t=" + current timestamp
@@ -156,6 +167,13 @@
             
             const updatedDate = formatInternationalDateTime(data.last_updated);
             document.getElementById('last-updated').innerText = "Last Updated: " + updatedDate + " (UTC)";
+            const feedbackLink = document.getElementById('feedback-link');
+            if (FEEDBACK_FORM_URL && !FEEDBACK_FORM_URL.includes("FORM_ID")) {
+                feedbackLink.href = FEEDBACK_FORM_URL;
+            } else {
+                feedbackLink.href = "#";
+                feedbackLink.title = "Set FEEDBACK_FORM_URL to enable feedback";
+            }
 
             const sortMode = window.currentSortMode || "total-roi";
             const viewModels = data.games.map(game => {
@@ -221,7 +239,17 @@
             loadData();
         });
 
+        function trackVisit() {
+            if (!GOATCOUNTER_URL || GOATCOUNTER_URL.includes("YOURCODE")) return;
+            const img = new Image();
+            const url = new URL(GOATCOUNTER_URL);
+            url.searchParams.set("p", window.location.pathname);
+            url.searchParams.set("t", document.title);
+            img.src = url.toString();
+        }
+
         loadData();
+        trackVisit();
     </script>
 </body>
 </html>
