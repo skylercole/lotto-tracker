@@ -11,7 +11,7 @@ on:
   
   # The Schedule
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "0 */6 * * *"
 
 permissions:
   contents: write
@@ -21,11 +21,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Debug trigger
-      run: |
-        echo "EVENT: $GITHUB_EVENT_NAME"
-        echo "--- event payload ---"
-        cat "$GITHUB_EVENT_PATH"
     - name: Checkout code
       uses: actions/checkout@v4
 
