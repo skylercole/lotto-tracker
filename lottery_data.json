@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-01-24 11:07:20",
+  "last_updated": "2026-01-24 11:51:45",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -11,7 +11,7 @@
       "currency": "\u20ac"
     },
     {
-      "name": "Vikinglotto",
+      "name": "Viking lotto",
       "jackpot": 6400000.0,
       "price": 1.0,
       "next_draw": "2026-01-28 19:00",
