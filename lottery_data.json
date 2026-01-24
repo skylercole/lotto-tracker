@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-01-23 17:32:32",
+  "last_updated": "2026-01-24 11:07:20",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -21,9 +21,9 @@
     },
     {
       "name": "Eurojackpot",
-      "jackpot": 52000000.0,
+      "jackpot": 10000000.0,
       "price": 2.0,
-      "next_draw": "2026-01-23 19:45",
+      "next_draw": "2026-01-27 19:45",
       "odds_jackpot": 139838160,
       "base_rtp": 0.32,
       "currency": "\u20ac"
