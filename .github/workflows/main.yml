@@ -1,9 +1,8 @@
 name: Update Lottery Data
 
 on:
-  workflow_dispatch:      # Manual trigger
   schedule:
-    - cron: '35 * * * *'  # Runs every hour at minute 15
+    - cron: '40 * * * *'
 
 permissions:
   contents: write
