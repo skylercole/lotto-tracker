@@ -104,12 +104,27 @@
             return { jackpotROI, totalROI };
         }
 
-        function formatFinnishDate(dateTime) {
+        function formatInternationalDate(dateTime) {
             if (!dateTime) return '';
+            if (dateTime === 'Unknown') return dateTime;
             const datePart = dateTime.split(' ')[0];
-            const parts = datePart.split('-');
-            if (parts.length !== 3) return datePart;
-            return `${parts[2]}.${parts[1]}.${parts[0]}`;
+            const parsed = new Date(datePart);
+            if (Number.isNaN(parsed.getTime())) return datePart;
+            return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long' }).format(parsed);
+        }
+
+        function formatInternationalDateTime(dateTime) {
+            if (!dateTime) return '';
+            const normalized = dateTime.replace(' ', 'T');
+            const parsed = new Date(normalized);
+            if (Number.isNaN(parsed.getTime())) return dateTime;
+            return new Intl.DateTimeFormat('en-GB', {
+                day: 'numeric',
+                month: 'long',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }).format(parsed);
         }
 
         function makeLogo(label, background, foreground) {
@@ -134,7 +149,7 @@
             const container = document.getElementById('app');
             container.innerHTML = '';
             
-            const updatedDate = formatFinnishDate(data.last_updated);
+            const updatedDate = formatInternationalDateTime(data.last_updated);
             document.getElementById('last-updated').innerText = "Last Updated: " + updatedDate;
 
             const sortMode = window.currentSortMode || "total-roi";
@@ -178,7 +193,7 @@
                         </div>
                         <div class="stat-row">
                             <span class="label">Next Draw</span>
-                            <span>${formatFinnishDate(game.next_draw)}</span>
+                            <span>${formatInternationalDate(game.next_draw)}</span>
                         </div>
                     </div>
                 `;

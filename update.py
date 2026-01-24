@@ -1,11 +1,10 @@
 import requests
 import json
-import time
-import xml.etree.ElementTree as ET
-from datetime import datetime
+import re
+from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
 
 # --- CONFIGURATION ---
-# Base RTP estimates (Return To Player)
 RTP_CONFIG = {
     "LOTTO": 0.23, "VIKING": 0.25, "EJACKPOT": 0.32,
     "POWERBALL": 0.15, "MEGAMILLIONS": 0.15, "EUROMILLIONS": 0.20
@@ -18,240 +17,291 @@ ODDS_CONFIG = {
 
 NAMES = {
     "LOTTO": "Finnish Lotto",
-    "VIKING": "Viking lotto",
+    "VIKING": "Vikinglotto",
     "EJACKPOT": "Eurojackpot",
     "POWERBALL": "US Powerball",
     "MEGAMILLIONS": "Mega Millions",
     "EUROMILLIONS": "EuroMillions"
 }
 
-USER_AGENT = "Mozilla/5.0 (LottoBot/1.0)"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
-# --- DATA FETCHERS ---
-
-def _safe_get_json(url, timeout=10):
-    resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=timeout)
-    if not resp.ok:
-        return None
-    return resp.json()
-
-def _safe_get_text(url, timeout=10):
-    resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=timeout)
-    if not resp.ok:
-        return None
-    return resp.text
-
-def _parse_number(value):
-    if value is None:
-        return None
-    if isinstance(value, (int, float)):
-        return float(value)
-    text = str(value).strip().replace(",", "")
-    digits = "".join(ch for ch in text if ch.isdigit() or ch == ".")
-    if not digits:
-        return None
+# --- HELPERS ---
+def _next_weekday_date(weekday_name):
     try:
-        return float(digits)
-    except ValueError:
+        weekdays = {
+            "monday": 0, "tuesday": 1, "wednesday": 2,
+            "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6
+        }
+        target = weekdays.get(weekday_name.lower())
+        if target is None:
+            return None
+        today = datetime.now().date()
+        delta = (target - today.weekday()) % 7
+        if delta == 0:
+            delta = 7
+        return (today + timedelta(days=delta)).strftime("%Y-%m-%d")
+    except Exception:
         return None
 
+def _next_euromillions_draw_date():
+    # EuroMillions draws on Tuesdays and Fridays
+    try:
+        today = datetime.now().date()
+        weekdays = {"tuesday": 1, "friday": 4}
+        candidates = []
+        for name, target in weekdays.items():
+            delta = (target - today.weekday()) % 7
+            if delta == 0:
+                delta = 7
+            candidates.append(today + timedelta(days=delta))
+        next_date = min(candidates)
+        return next_date.strftime("%Y-%m-%d")
+    except Exception:
+        return None
+
+# --- 1. VEIKKAUS ---
 def fetch_veikkaus(game_id):
-    """Fetches official Finnish data for Lotto, Viking, Eurojackpot"""
     url = f"https://www.veikkaus.fi/api/draw-open-games/v1/games/{game_id}/draws"
     try:
         resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=10)
-        if not resp.ok:
-            return None
+        if resp.status_code != 200: return None
         data = resp.json()
-        if not data:
-            return None
-
+        if not data: return None
+        
         draw = data[0]
-        # Veikkaus returns cents (1000 = EUR 10.00)
-        jackpot_cents = 0
-        if draw.get("jackpots"):
-            jackpot_cents = draw["jackpots"][0]["amount"]
-        price_cents = draw["gameRuleSet"]["basePrice"]
-        draw_time = draw["drawTime"]
-
         return {
-            "name": draw.get("brandName") or NAMES[game_id],
-            "jackpot": jackpot_cents / 100,
-            "price": price_cents / 100,
-            "next_draw": datetime.fromtimestamp(draw_time / 1000).strftime("%Y-%m-%d %H:%M"),
+            "name": NAMES[game_id],
+            "jackpot": draw['jackpots'][0]['amount'] / 100,
+            "price": draw['gameRuleSet']['basePrice'] / 100,
+            "next_draw": datetime.fromtimestamp(draw['drawTime'] / 1000).strftime('%Y-%m-%d'),
             "currency": "€",
             "odds_jackpot": ODDS_CONFIG[game_id],
             "base_rtp": RTP_CONFIG[game_id]
         }
     except Exception as e:
-        print(f"⚠️ Veikkaus {game_id} failed: {e}")
+        print(f"⚠️ Veikkaus {game_id} Error: {e}")
         return None
 
-def fetch_mass_lottery():
-    """Fetches US Powerball & Mega Millions from Mass Lottery (Clean JSON)"""
-    # This endpoint returns ALL games including multi-state ones
-    url = "https://www.masslottery.com/rest/games/games"
-    results = {}
-
+# --- 2. US SCRAPER (Fixed for Newlines) ---
+def scrape_lotteryusa(game_key, url):
+    print(f"   Scraping {NAMES[game_key]} from LotteryUSA...")
     try:
-        data = _safe_get_json(url)
-        if not isinstance(data, list):
-            return {}
+        resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=15)
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        
+        jackpot_val = 0
+        date_str = "Check Site"
+        
+        # Iterate over ALL title boxes to find the matching ones
+        # This ignores the "Next \n Powerball \n draw" spacing issues
+        titles = soup.find_all(class_="c-state-short-info__title")
+        
+        for title_box in titles:
+            text = title_box.get_text(" ", strip=True).lower() # "next powerball draw"
+            
+            # --- A. FIND DATE ---
+            # Check if this box is the "Next Draw" label
+            target_name = "powerball" if game_key == "POWERBALL" else "mega millions"
+            
+            if "next" in text and target_name in text and "draw" in text:
+                # The date is in the sibling <time> tag
+                time_tag = title_box.find_next_sibling("time")
+                if time_tag:
+                    date_text = time_tag.get_text(strip=True) # "Today at 10:59 pm EST"
+                    
+                    if "Today" in date_text:
+                        date_str = datetime.now().strftime('%Y-%m-%d')
+                    elif "Tomorrow" in date_text:
+                        date_str = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+                    else:
+                        # Look for "Jan 24"
+                        match = re.search(r'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2})', date_text, re.IGNORECASE)
+                        if match:
+                            month_str = match.group(1)
+                            day_str = match.group(2)
+                            try:
+                                year = datetime.now().year
+                                dt = datetime.strptime(f"{month_str} {day_str} {year}", "%b %d %Y")
+                                if dt < datetime.now() - timedelta(days=60): dt = dt.replace(year=year + 1)
+                                date_str = dt.strftime('%Y-%m-%d')
+                            except:
+                                pass
 
-        # Helper to find specific game in the list
-        def extract_game(api_name, internal_name):
-            for game in data:
-                game_id = (game.get("game_id") or game.get("gameId") or game.get("id") or "").upper()
-                if game_id == api_name:
-                    jackpot = (
-                        _parse_number(game.get("jackpot")) or
-                        _parse_number(game.get("estimated_jackpot")) or
-                        _parse_number(game.get("jackpotAmount"))
+            # --- B. FIND JACKPOT ---
+            if "next" in text and "est" in text and "jackpot" in text:
+                # Valid jackpot box. Now we must ensure it's for the RIGHT game.
+                # Usually, LotteryUSA pages only show ONE game's jackpot per URL.
+                # So any "Next est. jackpot" on the page is safe to take.
+                
+                subtitle_div = title_box.find_next_sibling(class_="c-state-short-info__subtitle")
+                if subtitle_div:
+                    # Destroy the "Cash value" span to avoid confusion
+                    for span in subtitle_div.find_all('span'):
+                        span.decompose()
+                    
+                    money_text = subtitle_div.get_text(strip=True)
+                    match = re.search(r'\$\s?([0-9.]+)\s?(Million|Billion)', money_text, re.IGNORECASE)
+                    if match:
+                        val = float(match.group(1))
+                        if "billion" in match.group(2).lower(): val *= 1_000_000_000
+                        else: val *= 1_000_000
+                        jackpot_val = val
+
+        if jackpot_val > 0:
+            return {
+                "name": NAMES[game_key],
+                "jackpot": jackpot_val,
+                "price": 2.00,
+                "next_draw": date_str,
+                "currency": "$",
+                "odds_jackpot": ODDS_CONFIG[game_key],
+                "base_rtp": RTP_CONFIG[game_key]
+            }
+        else:
+            print(f"❌ '{NAMES[game_key]}' Jackpot not found.")
+            return None
+
+    except Exception as e:
+        print(f"⚠️ Scrape Error {game_key}: {e}")
+        return None
+
+# --- 3. EUROMILLIONS ---
+def scrape_euromillions():
+    print(f"   Scraping EuroMillions from Lottery.ie...")
+    url = "https://www.lottery.ie/draw-games/euromillions"
+    try:
+        resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=15)
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        
+        jackpot_val = 0
+        date_str = "Check Site"
+        
+        # 1. FIND JACKPOT
+        # Irish site usually has a clear "Next Jackpot" block
+        # We search for the € symbol followed by a big number
+        full_text = soup.get_text(separator=" ", strip=True)
+        
+        # Regex to find: €17,000,000 or €130 Million
+        # It scans the whole page for the biggest Euro value (Jackpot is always biggest)
+        matches = re.findall(r'€\s?([0-9,]+(\.[0-9]+)?)\s?(Million)?', full_text, re.IGNORECASE)
+        
+        candidates = []
+        for m in matches:
+            amount_str = m[0].replace(",", "")
+            try:
+                val = float(amount_str)
+                if m[2] and "million" in m[2].lower():
+                    val *= 1_000_000
+                if val > 15_000_000: # EuroMillions min jackpot is 17M, so ignore small prizes
+                    candidates.append(val)
+            except:
+                continue
+                
+        if candidates:
+            jackpot_val = max(candidates) # Assume biggest number is the jackpot
+
+        # 2. FIND DATE
+        # A) Pattern like "Next Draw: Friday, 30th January"
+        draw_match = re.search(r'Next Draw:?\s+([A-Za-z]+,?\s+\d{1,2}(st|nd|rd|th)?\s+[A-Za-z]+)', full_text, re.IGNORECASE)
+        if draw_match:
+            # Matches: "Friday, 30th January"
+            date_text = draw_match.group(1)
+            # Clean "30th" -> "30"
+            clean_date = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', date_text)
+            
+            match = re.search(r'(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)', clean_date, re.IGNORECASE)
+            if match:
+                try:
+                    year = datetime.now().year
+                    dt = datetime.strptime(f"{match.group(1)} {match.group(2)} {year}", "%d %b %Y")
+                    if dt < datetime.now() - timedelta(days=60):
+                        dt = dt.replace(year=year + 1)
+                    date_str = dt.strftime('%Y-%m-%d')
+                except:
+                    pass
+        # B) Pattern like "Tuesday, 7:30pm"
+        if date_str == "Check Site":
+            # Match visible "Tuesday, 7:30pm" style strings
+            weekday_time = re.search(
+                r'(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s*,?\s*\d{1,2}:\d{2}\s*(am|pm)?',
+                full_text,
+                re.IGNORECASE
+            )
+            if weekday_time:
+                next_date = _next_weekday_date(weekday_time.group(1))
+                if next_date:
+                    date_str = next_date
+            else:
+                # Fallback: search specifically in <p> tags for the weekday/time snippet
+                for p in soup.find_all("p"):
+                    p_text = p.get_text(" ", strip=True)
+                    p_match = re.search(
+                        r'(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s*,?\s*\d{1,2}:\d{2}\s*(am|pm)?',
+                        p_text,
+                        re.IGNORECASE
                     )
-                    if jackpot is None:
-                        return None
-                    return {
-                        "name": internal_name,
-                        "jackpot": jackpot,
-                        "price": 2.00,
-                        "next_draw": game.get("next_draw_date") or game.get("nextDrawDate") or "Unknown",
-                        "currency": "$",
-                        "odds_jackpot": ODDS_CONFIG["POWERBALL" if api_name == "DB" else "MEGAMILLIONS"],
-                        "base_rtp": RTP_CONFIG["POWERBALL" if api_name == "DB" else "MEGAMILLIONS"]
-                    }
-            return None
+                    if p_match:
+                        next_date = _next_weekday_date(p_match.group(1))
+                        if next_date:
+                            date_str = next_date
+                            break
 
-        # "DB" is Powerball, "MEGA" is Mega Millions in their system
-        results["POWERBALL"] = extract_game("DB", NAMES["POWERBALL"])
-        results["MEGAMILLIONS"] = extract_game("MEGA", NAMES["MEGAMILLIONS"])
+        if date_str == "Check Site":
+            print("⚠️ EuroMillions date not found in page text.")
+            fallback_date = _next_euromillions_draw_date()
+            if fallback_date:
+                date_str = fallback_date
 
-    except Exception as e:
-        print(f"⚠️ Mass Lottery failed: {e}")
-
-    return results
-
-def fetch_euromillions():
-    """Fetches EuroMillions from UK National Lottery XML"""
-    # XML is often more stable than undocumented JSON APIs
-    url = "https://www.national-lottery.co.uk/results/euromillions/draw-history/xml"
-
-    try:
-        xml_text = _safe_get_text(url)
-        if not xml_text:
-            return fetch_euromillions_scrape()
-
-        root = ET.fromstring(xml_text)
-        latest_draw = root.find(".//draw")
-        if latest_draw is None:
-            return fetch_euromillions_scrape()
-
-        jackpot = None
-        for tag in ("jackpot", "jackpot-amount", "jackpot_amount", "jackpotAmount"):
-            elem = latest_draw.find(tag)
-            if elem is not None and elem.text:
-                jackpot = _parse_number(elem.text)
-                break
-
-        draw_date = (
-            latest_draw.findtext("draw-date") or
-            latest_draw.findtext("drawDate") or
-            latest_draw.findtext("date")
-        )
-
-        if jackpot is None:
-            return fetch_euromillions_scrape()
-
-        return {
-            "name": NAMES["EUROMILLIONS"],
-            "jackpot": jackpot,
-            "price": 2.50,
-            "next_draw": draw_date or "Unknown",
-            "currency": "€",
-            "odds_jackpot": ODDS_CONFIG["EUROMILLIONS"],
-            "base_rtp": RTP_CONFIG["EUROMILLIONS"]
-        }
-    except Exception as e:
-        print(f"⚠️ EuroMillions XML failed: {e}")
-        return fetch_euromillions_scrape()
-
-def fetch_euromillions_scrape():
-    """Backup: Quick scrape of a lightweight results site"""
-    try:
-        # Lottoland's public API is often open
-        url = "https://www.lottoland.com/api/drawings/euromillions"
-        data = _safe_get_json(url)
-        if not isinstance(data, dict):
-            return None
-
-        next_draw = data.get("next", {})
-        jackpot_eur = (
-            next_draw.get("jackpot", {}).get("amount") or
-            next_draw.get("jackpotAmount")
-        )
-        date_str = (
-            next_draw.get("date", {}).get("full") or
-            next_draw.get("date") or
-            ""
-        )
-
-        jackpot_value = _parse_number(jackpot_eur)
-        if jackpot_value is None:
-            return None
-
-        # Lottoland sometimes returns cents for large values
-        if jackpot_value > 1_000_000_000:
-            jackpot_value = jackpot_value / 100
-
-        return {
-            "name": NAMES["EUROMILLIONS"],
-            "jackpot": jackpot_value,
-            "price": 2.50,
-            "next_draw": date_str or "Unknown",
-            "currency": "€",
-            "odds_jackpot": ODDS_CONFIG["EUROMILLIONS"],
-            "base_rtp": RTP_CONFIG["EUROMILLIONS"]
-        }
-    except Exception:
+        if jackpot_val > 0:
+            return {
+                "name": NAMES["EUROMILLIONS"],
+                "jackpot": jackpot_val,
+                "price": 2.50,
+                "next_draw": date_str,
+                "currency": "€",
+                "odds_jackpot": ODDS_CONFIG["EUROMILLIONS"],
+                "base_rtp": RTP_CONFIG["EUROMILLIONS"]
+            }
+        
+        print("❌ EuroMillions: Could not find jackpot pattern.")
         return None
 
-# --- MAIN CONTROLLER ---
+    except Exception as e:
+        print(f"⚠️ EuroMillions Error: {e}")
+        return None
 
+# --- MAIN RUNNER ---
 def update_database():
     games_list = []
     print("--- Starting Update Job ---")
-
-    # 1. VEIKKAUS (Finland)
+    
+    # 1. VEIKKAUS
     for gid in ["LOTTO", "VIKING", "EJACKPOT"]:
-        data = fetch_veikkaus(gid)
-        if data:
-            games_list.append(data)
-            print(f"✅ Success: {data['name']} (€{data['jackpot']:,.0f})")
-        else:
-            print(f"❌ Failed to fetch {gid}")
-        time.sleep(1) # Be polite to the API
+        g = fetch_veikkaus(gid)
+        if g: games_list.append(g); print(f"✅ Success: {g['name']}")
 
-    # 2. MASS LOTTERY (USA)
-    us_data = fetch_mass_lottery()
-    if us_data.get("POWERBALL"):
-        games_list.append(us_data["POWERBALL"])
-    if us_data.get("MEGAMILLIONS"):
-        games_list.append(us_data["MEGAMILLIONS"])
+    # 2. US GAMES
+    pb = scrape_lotteryusa("POWERBALL", "https://www.lotteryusa.com/powerball/")
+    if pb: games_list.append(pb); print(f"✅ Success: US Powerball ({pb['jackpot']} - {pb['next_draw']})")
+    
+    mm = scrape_lotteryusa("MEGAMILLIONS", "https://www.lotteryusa.com/mega-millions/")
+    if mm: games_list.append(mm); print(f"✅ Success: Mega Millions ({mm['jackpot']} - {mm['next_draw']})")
 
-    # 3. EUROMILLIONS (Europe)
-    em = fetch_euromillions()
-    if em:
-        games_list.append(em)
+    # 3. EUROMILLIONS
+    em = scrape_euromillions()
+    if em: games_list.append(em); print(f"✅ Success: EuroMillions ({em['jackpot']} - {em['next_draw']})")
 
-    # SAVE TO FILE
+    # SAVE
     output = {
         "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "games": games_list
     }
-
-    with open("lottery_data.json", "w", encoding="utf-8") as f:
+    
+    with open("lottery_data.json", "w", encoding='utf-8') as f:
         json.dump(output, f, indent=2)
-
-    print(f"✅ Updated {len(games_list)} lotteries successfully.")
+        
+    print("\n💾 Database saved.")
 
 if __name__ == "__main__":
     update_database()

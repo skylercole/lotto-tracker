@@ -1,32 +1,59 @@
 {
-  "last_updated": "2026-01-24 12:10:51",
+  "last_updated": "2026-01-24 14:49:52",
   "games": [
     {
-      "name": "Lotto",
+      "name": "Finnish Lotto",
       "jackpot": 16000000.0,
       "price": 1.0,
-      "next_draw": "2026-01-24 20:05",
+      "next_draw": "2026-01-24",
       "currency": "\u20ac",
       "odds_jackpot": 18643560,
       "base_rtp": 0.23
     },
     {
-      "name": "Viking",
+      "name": "Vikinglotto",
       "jackpot": 6400000.0,
       "price": 1.0,
-      "next_draw": "2026-01-28 19:00",
+      "next_draw": "2026-01-28",
       "currency": "\u20ac",
       "odds_jackpot": 61357560,
       "base_rtp": 0.25
     },
     {
-      "name": "Tiistai-EuroJackpot",
+      "name": "Eurojackpot",
       "jackpot": 10000000.0,
       "price": 2.0,
-      "next_draw": "2026-01-27 19:45",
+      "next_draw": "2026-01-27",
       "currency": "\u20ac",
       "odds_jackpot": 139838160,
       "base_rtp": 0.32
+    },
+    {
+      "name": "US Powerball",
+      "jackpot": 20000000.0,
+      "price": 2.0,
+      "next_draw": "2026-01-24",
+      "currency": "$",
+      "odds_jackpot": 292201338,
+      "base_rtp": 0.15
+    },
+    {
+      "name": "Mega Millions",
+      "jackpot": 285000000.0,
+      "price": 2.0,
+      "next_draw": "2026-01-27",
+      "currency": "$",
+      "odds_jackpot": 302575350,
+      "base_rtp": 0.15
+    },
+    {
+      "name": "EuroMillions",
+      "jackpot": 110000000.0,
+      "price": 2.5,
+      "next_draw": "2026-01-27",
+      "currency": "\u20ac",
+      "odds_jackpot": 139838160,
+      "base_rtp": 0.2
     }
   ]
 }
