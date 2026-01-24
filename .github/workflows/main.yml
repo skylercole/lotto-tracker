@@ -16,6 +16,12 @@ on:
 permissions:
   contents: write
 
+- name: Debug trigger
+      run: |
+        echo "EVENT: $GITHUB_EVENT_NAME"
+        echo "--- event payload ---"
+        cat "$GITHUB_EVENT_PATH"
+
 jobs:
   build:
     runs-on: ubuntu-latest
