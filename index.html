@@ -140,8 +140,13 @@
         }
 
         function getGameImage(gameName) {
-            if (gameName.includes('Euro')) return makeLogo('EUROJACKPOT', '#f1c40f', '#1c1c1c');
-            if (gameName.includes('Viking')) return makeLogo('VIKINGLOTTO', '#2196f3', '#ffffff');
+            const key = (gameName || '').toLowerCase();
+            if (key.includes('eurojackpot')) return makeLogo('EUROJACKPOT', '#f1c40f', '#1c1c1c');
+            if (key.includes('euromillions')) return makeLogo('EUROMILLIONS', '#1e88e5', '#ffd54f');
+            if (key.includes('viking')) return makeLogo('VIKINGLOTTO', '#2196f3', '#ffffff');
+            if (key.includes('powerball')) return makeLogo('POWERBALL', '#e53935', '#ffffff');
+            if (key.includes('mega millions')) return makeLogo('MEGA MILLIONS', '#1565c0', '#ffffff');
+            if (key.includes('finnish lotto') || key.includes('lotto')) return makeLogo('FINNISH LOTTO', '#ef5350', '#ffffff');
             return makeLogo('LOTTO', '#ef5350', '#ffffff');
         }
 
@@ -172,7 +177,15 @@
             viewModels.forEach(({ game, metrics }) => {
                 const isPositive = parseFloat(metrics.totalROI) > 100;
                 const badgeClass = isPositive ? 'good' : (metrics.totalROI > 60 ? 'mid' : 'bad');
-                const borderColor = isPositive ? '#4caf50' : (game.name.includes('Euro') ? '#e6b800' : (game.name.includes('Viking') ? '#2196f3' : '#ef5350'));
+                const nameKey = (game.name || '').toLowerCase();
+                const borderColor = isPositive ? '#4caf50' : (
+                    nameKey.includes('eurojackpot') ? '#e6b800' :
+                    nameKey.includes('euromillions') ? '#1e88e5' :
+                    nameKey.includes('powerball') ? '#e53935' :
+                    nameKey.includes('mega millions') ? '#1565c0' :
+                    nameKey.includes('viking') ? '#2196f3' :
+                    '#ef5350'
+                );
 
                 const html = `
                     <div class="card" style="border-top-color: ${borderColor}">

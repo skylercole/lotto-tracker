@@ -1,9 +1,17 @@
 name: Update Lottery Data
 
 on:
+  # Run on every push to main (Forces GitHub to see the file)
+  push:
+    branches:
+      - main
+  
+  # Run manually
+  workflow_dispatch:
+  
+  # The Schedule
   schedule:
     - cron: '*/15 * * * *'
-  workflow_dispatch:
 
 permissions:
   contents: write
