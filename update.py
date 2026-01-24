@@ -2,6 +2,7 @@ import requests
 import json
 import time
 from datetime import datetime
+import re
 
 # CONFIGURATION
 # Base RTP estimates (Non-jackpot return to player)
@@ -33,10 +34,21 @@ NAMES = {
     "EUROMILLIONS": "EuroMillions"
 }
 
-def _safe_get(url, headers=None, timeout=10):
-    response = requests.get(url, headers=headers, timeout=timeout)
-    response.raise_for_status()
-    return response.json()
+def _safe_get(url, headers=None, timeout=10, retries=2, backoff=2, expect_json=True):
+    last_response = None
+    for attempt in range(retries + 1):
+        response = requests.get(url, headers=headers, timeout=timeout)
+        last_response = response
+        if response.status_code == 429 and attempt < retries:
+            retry_after = response.headers.get("Retry-After")
+            sleep_seconds = int(retry_after) if retry_after and retry_after.isdigit() else backoff * (attempt + 1)
+            time.sleep(sleep_seconds)
+            continue
+        response.raise_for_status()
+        return response.json() if expect_json else response.text
+    if last_response is not None:
+        last_response.raise_for_status()
+    return None
 
 def _parse_money(value):
     if value is None:
@@ -57,6 +69,25 @@ def _parse_money(value):
         return float(digits) * multiplier if digits else None
     except ValueError:
         return None
+
+def _extract_jackpot_from_text(text):
+    if not text:
+        return None
+    patterns = [
+        r"Estimated Jackpot\s*\$?\s*([0-9,.]+)\s*(Billion|Million|B|M)?",
+        r"Jackpot\s*\$?\s*([0-9,.]+)\s*(Billion|Million|B|M)?"
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            amount = match.group(1)
+            unit = (match.group(2) or "").lower()
+            if unit in ("billion", "b"):
+                return _parse_money(f"{amount}b")
+            if unit in ("million", "m"):
+                return _parse_money(f"{amount}m")
+            return _parse_money(amount)
+    return None
 
 def _first_list_item(payload):
     if isinstance(payload, list):
@@ -111,18 +142,25 @@ def fetch_game_data(game_id):
 def fetch_international_data():
     results = []
 
+    headers = {
+        "User-Agent": "Mozilla/5.0 (LottoBot/1.0)",
+        "Accept": "application/json"
+    }
+
     # 1. US POWERBALL (Source: NY State Gov API)
     pb_url = "https://data.ny.gov/resource/d6yy-54nr.json?$order=draw_date DESC&$limit=1"
+    pb_est_url = "https://www.powerball.com/api/v1/estimates/powerball"
 
     # 2. MEGA MILLIONS (Source: NY State Gov API)
     mm_url = "https://data.ny.gov/resource/5xaw-6ayf.json?$order=draw_date DESC&$limit=1"
+    mm_est_url = "https://www.megamillions.com/"
 
     # 3. EURO MILLIONS (Third-party API)
     em_url = "https://euromillions.api.pedromealha.dev/v1/draws?limit=1"
 
     try:
         # --- FETCH POWERBALL ---
-        pb_data = _first_list_item(_safe_get(pb_url))
+        pb_data = _first_list_item(_safe_get(pb_url, headers=headers))
         if not pb_data:
             raise ValueError("No Powerball data returned")
         jackpot = (
@@ -131,7 +169,10 @@ def fetch_international_data():
             _parse_money(pb_data.get("jackpot_amount"))
         )
         if jackpot is None:
-            raise ValueError("No Powerball jackpot in NY data")
+            pb_text = _safe_get(pb_est_url, headers=headers, expect_json=False)
+            jackpot = _extract_jackpot_from_text(pb_text)
+        if jackpot is None:
+            raise ValueError("No Powerball jackpot from NY data or Powerball.com")
 
         results.append({
             "name": NAMES["POWERBALL"],
@@ -147,7 +188,7 @@ def fetch_international_data():
 
     try:
         # --- FETCH MEGA MILLIONS ---
-        mm_data = _first_list_item(_safe_get(mm_url))
+        mm_data = _first_list_item(_safe_get(mm_url, headers=headers))
         if not mm_data:
             raise ValueError("No Mega Millions data returned")
         jackpot = (
@@ -156,7 +197,10 @@ def fetch_international_data():
             _parse_money(mm_data.get("jackpot_amount"))
         )
         if jackpot is None:
-            raise ValueError("No Mega Millions jackpot in NY data")
+            mm_text = _safe_get(mm_est_url, headers=headers, expect_json=False)
+            jackpot = _extract_jackpot_from_text(mm_text)
+        if jackpot is None:
+            raise ValueError("No Mega Millions jackpot from NY data or MegaMillions.com")
 
         results.append({
             "name": NAMES["MEGAMILLIONS"],
@@ -172,7 +216,7 @@ def fetch_international_data():
 
     try:
         # --- FETCH EUROMILLIONS ---
-        em_data = _safe_get(em_url)
+        em_data = _safe_get(em_url, headers=headers)
         em_draw = _first_list_item(em_data) or em_data
         jackpot = (
             _parse_money(em_draw.get("jackpot")) or
