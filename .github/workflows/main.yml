@@ -2,7 +2,7 @@ name: Update Lottery Data
 
 on:
   schedule:
-    - cron: '40 * * * *'
+    - cron: '*/15 * * * *'
 
 permissions:
   contents: write
