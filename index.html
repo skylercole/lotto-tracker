@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lottery Value Tracker</title>
+    <title>Jackpot Value Dashboard</title>
     <style>
         :root { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --accent: #4caf50; --danger: #ef5350; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; text-align: center; }
@@ -155,7 +155,7 @@
             container.innerHTML = '';
             
             const updatedDate = formatInternationalDateTime(data.last_updated);
-            document.getElementById('last-updated').innerText = "Last Updated: " + updatedDate;
+            document.getElementById('last-updated').innerText = "Last Updated: " + updatedDate + " (UTC)";
 
             const sortMode = window.currentSortMode || "total-roi";
             const viewModels = data.games.map(game => {
