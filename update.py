@@ -8,20 +8,55 @@ from datetime import datetime
 RTP_CONFIG = {
     "LOTTO": 0.23,   # Finnish Lotto
     "VIKING": 0.25,  # Vikinglotto
-    "EJACKPOT": 0.32 # Eurojackpot
+    "EJACKPOT": 0.32, # Eurojackpot
+    # International benchmarks (RTP varies by market/state)
+    "POWERBALL": None,
+    "MEGAMILLIONS": None,
+    "EUROMILLIONS": None
 }
 
 ODDS_CONFIG = {
     "LOTTO": 18643560,
     "VIKING": 61357560,
-    "EJACKPOT": 139838160
+    "EJACKPOT": 139838160,
+    "POWERBALL": 292201338,
+    "MEGAMILLIONS": 302575350,
+    "EUROMILLIONS": 139838160
 }
 
 NAMES = {
     "LOTTO": "Finnish Lotto",
-    "VIKING": "Vikinglotto",
-    "EJACKPOT": "Eurojackpot"
+    "VIKING": "Viking lotto",
+    "EJACKPOT": "Eurojackpot",
+    "POWERBALL": "US Powerball",
+    "MEGAMILLIONS": "Mega Millions",
+    "EUROMILLIONS": "EuroMillions"
 }
+
+def _safe_get(url, headers=None, timeout=10):
+    response = requests.get(url, headers=headers, timeout=timeout)
+    response.raise_for_status()
+    return response.json()
+
+def _parse_money(value):
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    text = str(value).strip().lower().replace(",", "")
+    # Handle formats like "$450 Million", "€250m", "450000000"
+    multiplier = 1
+    if ("billion" in text) or text.endswith("b"):
+        multiplier = 1_000_000_000
+    elif ("million" in text) or text.endswith("m"):
+        multiplier = 1_000_000
+    elif ("thousand" in text) or text.endswith("k"):
+        multiplier = 1_000
+    digits = "".join(ch for ch in text if ch.isdigit() or ch == ".")
+    try:
+        return float(digits) * multiplier if digits else None
+    except ValueError:
+        return None
 
 def fetch_game_data(game_id):
     url = f"https://www.veikkaus.fi/api/draw-open-games/v1/games/{game_id}/draws"
@@ -63,6 +98,91 @@ def fetch_game_data(game_id):
         print(f"Error fetching {game_id}: {e}")
         return None
 
+def fetch_international_data():
+    results = []
+
+    # 1. US POWERBALL (Source: NY State Gov API)
+    pb_url = "https://data.ny.gov/resource/d6yy-54nr.json?$order=draw_date DESC&$limit=1"
+
+    # 2. MEGA MILLIONS (Source: NY State Gov API)
+    mm_url = "https://data.ny.gov/resource/5xaw-6ayf.json?$order=draw_date DESC&$limit=1"
+
+    # 3. EURO MILLIONS (Third-party, fallback-only)
+    em_url = "https://www.lottery.net/api/game/euromillions"
+
+    try:
+        # --- FETCH POWERBALL ---
+        pb_data = _safe_get(pb_url)[0]
+        jackpot = (
+            _parse_money(pb_data.get("jackpot")) or
+            _parse_money(pb_data.get("estimated_jackpot")) or
+            _parse_money(pb_data.get("jackpot_amount"))
+        )
+        if jackpot is None:
+            us_data = _safe_get(
+                "https://www.lottery.net/api/stats/us-powerball-accumulated-jackpot"
+            )
+            jackpot = _parse_money(us_data.get("jackpot")) or 20_000_000
+
+        results.append({
+            "name": NAMES["POWERBALL"],
+            "jackpot": jackpot,
+            "price": 2.00,
+            "next_draw": pb_data.get("draw_date"),
+            "odds_jackpot": ODDS_CONFIG["POWERBALL"],
+            "base_rtp": RTP_CONFIG["POWERBALL"],
+            "currency": "$"
+        })
+    except Exception as e:
+        print(f"Error fetching POWERBALL: {e}")
+
+    try:
+        # --- FETCH MEGA MILLIONS ---
+        mm_data = _safe_get(mm_url)[0]
+        jackpot = (
+            _parse_money(mm_data.get("jackpot")) or
+            _parse_money(mm_data.get("estimated_jackpot")) or
+            _parse_money(mm_data.get("jackpot_amount"))
+        )
+        if jackpot is None:
+            us_data = _safe_get(
+                "https://www.lottery.net/api/stats/us-mega-millions-accumulated-jackpot"
+            )
+            jackpot = _parse_money(us_data.get("jackpot")) or 20_000_000
+
+        results.append({
+            "name": NAMES["MEGAMILLIONS"],
+            "jackpot": jackpot,
+            "price": 2.00,
+            "next_draw": mm_data.get("draw_date"),
+            "odds_jackpot": ODDS_CONFIG["MEGAMILLIONS"],
+            "base_rtp": RTP_CONFIG["MEGAMILLIONS"],
+            "currency": "$"
+        })
+    except Exception as e:
+        print(f"Error fetching MEGAMILLIONS: {e}")
+
+    try:
+        # --- FETCH EUROMILLIONS ---
+        em_data = _safe_get(em_url)
+        jackpot = _parse_money(em_data.get("jackpot"))
+        next_draw = em_data.get("next_draw") or em_data.get("nextDraw")
+
+        if jackpot is not None:
+            results.append({
+                "name": NAMES["EUROMILLIONS"],
+                "jackpot": jackpot,
+                "price": em_data.get("ticket_price") or 2.50,
+                "next_draw": next_draw,
+                "odds_jackpot": ODDS_CONFIG["EUROMILLIONS"],
+                "base_rtp": RTP_CONFIG["EUROMILLIONS"],
+                "currency": "€"
+            })
+    except Exception as e:
+        print(f"Error fetching EUROMILLIONS: {e}")
+
+    return results
+
 def update_database():
     results = []
     print("--- Starting Update Job ---")
@@ -77,6 +197,9 @@ def update_database():
             print(f"❌ Failed to fetch {game_id}")
             
         time.sleep(1) # Be polite to the API
+
+    print("Fetching international benchmarks...")
+    results.extend(fetch_international_data())
         
     # Save to JSON
     output = {
