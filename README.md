@@ -3,6 +3,7 @@
 https://skylercole.github.io/lotto-tracker
 
 Minimal, script-driven tracker for lottery data with a lightweight HTML view.
+Calculates the ROI of each lottery game.
 
 ## Features
 
