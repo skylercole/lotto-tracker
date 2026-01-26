@@ -1,5 +1,7 @@
 # Lotto Tracker
 
+https://skylercole.github.io/lotto-tracker
+
 Minimal, script-driven tracker for lottery data with a lightweight HTML view.
 
 ## Features
