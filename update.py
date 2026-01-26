@@ -178,28 +178,46 @@ def scrape_euromillions():
         date_str = "Check Site"
         
         # 1. FIND JACKPOT
-        # Irish site usually has a clear "Next Jackpot" block
-        # We search for the € symbol followed by a big number
+        # Irish site usually has a clear "Jackpot" h1 block
         full_text = soup.get_text(separator=" ", strip=True)
         
-        # Regex to find: €17,000,000 or €130 Million
-        # It scans the whole page for the biggest Euro value (Jackpot is always biggest)
-        matches = re.findall(r'€\s?([0-9,]+(\.[0-9]+)?)\s?(Million)?', full_text, re.IGNORECASE)
+        # A) Prefer "€110 Million Jackpot" from the hero title
+        for h1 in soup.find_all("h1"):
+            h1_text = h1.get_text(" ", strip=True)
+            if "€" in h1_text and "jackpot" in h1_text.lower():
+                match = re.search(r'€\s?([0-9,]+(\.[0-9]+)?)\s?(Million)?', h1_text, re.IGNORECASE)
+                if match:
+                    amount_str = match.group(1).replace(",", "")
+                    try:
+                        val = float(amount_str)
+                        if match.group(3) and "million" in match.group(3).lower():
+                            val *= 1_000_000
+                        if val > 15_000_000: # EuroMillions min jackpot is 17M, so ignore small prizes
+                            jackpot_val = val
+                            break
+                    except:
+                        pass
         
-        candidates = []
-        for m in matches:
-            amount_str = m[0].replace(",", "")
-            try:
-                val = float(amount_str)
-                if m[2] and "million" in m[2].lower():
-                    val *= 1_000_000
-                if val > 15_000_000: # EuroMillions min jackpot is 17M, so ignore small prizes
-                    candidates.append(val)
-            except:
-                continue
-                
-        if candidates:
-            jackpot_val = max(candidates) # Assume biggest number is the jackpot
+        # B) Fallback: scan entire page for largest Euro value
+        if jackpot_val == 0:
+            # Regex to find: €17,000,000 or €130 Million
+            # It scans the whole page for the biggest Euro value (Jackpot is always biggest)
+            matches = re.findall(r'€\s?([0-9,]+(\.[0-9]+)?)\s?(Million)?', full_text, re.IGNORECASE)
+            
+            candidates = []
+            for m in matches:
+                amount_str = m[0].replace(",", "")
+                try:
+                    val = float(amount_str)
+                    if m[2] and "million" in m[2].lower():
+                        val *= 1_000_000
+                    if val > 15_000_000: # EuroMillions min jackpot is 17M, so ignore small prizes
+                        candidates.append(val)
+                except:
+                    continue
+                    
+            if candidates:
+                jackpot_val = max(candidates) # Assume biggest number is the jackpot
 
         # 2. FIND DATE
         # A) Pattern like "Next Draw: Friday, 30th January"
@@ -220,32 +238,51 @@ def scrape_euromillions():
                     date_str = dt.strftime('%Y-%m-%d')
                 except:
                     pass
-        # B) Pattern like "Tuesday, 7:30pm"
+        # B) Pattern like "Tomorrow, 7:30pm" or "Tuesday, 7:30pm"
         if date_str == "Check Site":
-            # Match visible "Tuesday, 7:30pm" style strings
-            weekday_time = re.search(
-                r'(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s*,?\s*\d{1,2}:\d{2}\s*(am|pm)?',
+            # Match visible "Today/Tomorrow, 7:30pm" style strings
+            relative_time = re.search(
+                r'(Today|Tomorrow)\s*,?\s*\d{1,2}:\d{2}\s*(am|pm)?',
                 full_text,
                 re.IGNORECASE
             )
-            if weekday_time:
-                next_date = _next_weekday_date(weekday_time.group(1))
-                if next_date:
-                    date_str = next_date
+            if relative_time:
+                if relative_time.group(1).lower() == "today":
+                    date_str = datetime.now().strftime('%Y-%m-%d')
+                else:
+                    date_str = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
             else:
-                # Fallback: search specifically in <p> tags for the weekday/time snippet
-                for p in soup.find_all("p"):
-                    p_text = p.get_text(" ", strip=True)
-                    p_match = re.search(
-                        r'(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s*,?\s*\d{1,2}:\d{2}\s*(am|pm)?',
-                        p_text,
-                        re.IGNORECASE
-                    )
-                    if p_match:
-                        next_date = _next_weekday_date(p_match.group(1))
-                        if next_date:
-                            date_str = next_date
-                            break
+                # Match visible "Tuesday, 7:30pm" style strings
+                weekday_time = re.search(
+                    r'(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s*,?\s*\d{1,2}:\d{2}\s*(am|pm)?',
+                    full_text,
+                    re.IGNORECASE
+                )
+                if weekday_time:
+                    next_date = _next_weekday_date(weekday_time.group(1))
+                    if next_date:
+                        date_str = next_date
+                else:
+                    # Fallback: search specifically in <p> tags for the weekday/time snippet
+                    for p in soup.find_all("p"):
+                        p_text = p.get_text(" ", strip=True)
+                        p_match = re.search(
+                            r'(Today|Tomorrow|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s*,?\s*\d{1,2}:\d{2}\s*(am|pm)?',
+                            p_text,
+                            re.IGNORECASE
+                        )
+                        if p_match:
+                            token = p_match.group(1).lower()
+                            if token == "today":
+                                date_str = datetime.now().strftime('%Y-%m-%d')
+                            elif token == "tomorrow":
+                                date_str = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+                            else:
+                                next_date = _next_weekday_date(p_match.group(1))
+                                if next_date:
+                                    date_str = next_date
+                            if date_str != "Check Site":
+                                break
 
         if date_str == "Check Site":
             print("⚠️ EuroMillions date not found in page text.")
