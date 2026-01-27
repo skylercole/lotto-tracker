@@ -57,8 +57,27 @@ h1 { margin-bottom: 30px; letter-spacing: 1px; }
 .card { 
     background: var(--card); border-radius: 16px; padding: 25px; width: 300px; 
     box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; border-top: 5px solid var(--text-muted);
+    position: relative; overflow: hidden;
+}
+.card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, var(--flag-color-1, var(--text-muted)), var(--flag-color-2, var(--flag-color-1, var(--text-muted))));
 }
 .card:hover { transform: translateY(-5px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+
+/* Country-specific card colors matching flags */
+.card-finland { --flag-color-1: #003580; --flag-color-2: #ffffff; border-top-color: #003580; }
+.card-nordic { --flag-color-1: #003087; --flag-color-2: #ffd700; border-top-color: #003087; }
+.card-eurojackpot { --flag-color-1: #003399; --flag-color-2: #ffcc00; border-top-color: #ffcc00; }
+.card-euromillions { --flag-color-1: #003399; --flag-color-2: #ffcc00; border-top-color: #003399; }
+.card-usa { --flag-color-1: #b22234; --flag-color-2: #3c3b6e; border-top-color: #b22234; }
+.card-italy { --flag-color-1: #009246; --flag-color-2: #ce2b37; border-top-color: #009246; }
+.card-uk { --flag-color-1: #012169; --flag-color-2: #c8102e; border-top-color: #c8102e; }
+.card-germany { --flag-color-1: #000000; --flag-color-2: #dd0000; border-top-color: #ffce00; }
+.card-france { --flag-color-1: #002395; --flag-color-2: #ed2939; border-top-color: #002395; }
+.card-ireland { --flag-color-1: #169b62; --flag-color-2: #ff883e; border-top-color: #169b62; }
+.card-switzerland { --flag-color-1: #ff0000; --flag-color-2: #ffffff; border-top-color: #ff0000; }
+.card-austria { --flag-color-1: #ed2939; --flag-color-2: #ffffff; border-top-color: #ed2939; }
 .jackpot { font-size: 2.2rem; font-weight: bold; margin: 15px 0; color: var(--text); }
 .game-logo { width: 120px; height: 48px; object-fit: contain; margin: 0 auto 10px; display: block; }
 .roi-badge { 

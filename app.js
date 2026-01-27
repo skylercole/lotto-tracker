@@ -47,7 +47,7 @@ const LOGO_MAP = [
     { match: key => key.includes("viking"), label: "VIKINGLOTTO", background: "#2196f3", foreground: "#ffffff" },
     { match: key => key.includes("powerball"), label: "POWERBALL", background: "#e53935", foreground: "#ffffff" },
     { match: key => key.includes("mega millions"), label: "MEGA MILLIONS", background: "#1565c0", foreground: "#ffffff" },
-    { match: key => key.includes("finnish lotto") || key === "lotto", label: "FINNISH LOTTO", background: "#ef5350", foreground: "#ffffff" }
+    { match: key => key.includes("finnish lotto") || key === "lotto", label: "FINNISH LOTTO", background: "#003580", foreground: "#ffffff" }
 ];
 
 const state = {
@@ -207,24 +207,41 @@ function buildCardNode({ game, metrics }) {
     const isPositive = parseFloat(metrics.totalROI) > 100;
     const badgeClass = isPositive ? 'good' : (metrics.totalROI > 60 ? 'mid' : 'bad');
     const nameKey = (game.name || '').toLowerCase();
-    const borderColor = isPositive ? '#4caf50' : (
-        nameKey.includes('eurojackpot') ? '#e6b800' :
-        nameKey.includes('euromillions') ? '#1e88e5' :
-        nameKey.includes('superenalotto') ? '#8e24aa' :
-        nameKey.includes('uk lotto') ? '#d32f2f' :
-        nameKey.includes('german lotto') ? '#ffcc00' :
-        nameKey.includes('french loto') ? '#0055a4' :
-        nameKey.includes('irish lotto') ? '#169b62' :
-        nameKey.includes('swiss lotto') ? '#ff0000' :
-        nameKey.includes('austrian lotto') ? '#ed2939' :
-        nameKey.includes('powerball') ? '#e53935' :
-        nameKey.includes('mega millions') ? '#1565c0' :
-        nameKey.includes('viking') ? '#2196f3' :
-        '#ef5350'
-    );
+    
+    // Determine country-specific card class
+    let countryClass = '';
+    if (nameKey.includes('finnish') || nameKey === 'lotto') {
+        countryClass = 'card-finland';
+    } else if (nameKey.includes('viking')) {
+        countryClass = 'card-nordic';
+    } else if (nameKey.includes('eurojackpot')) {
+        countryClass = 'card-eurojackpot';
+    } else if (nameKey.includes('euromillions')) {
+        countryClass = 'card-euromillions';
+    } else if (nameKey.includes('powerball') || nameKey.includes('mega millions')) {
+        countryClass = 'card-usa';
+    } else if (nameKey.includes('superenalotto')) {
+        countryClass = 'card-italy';
+    } else if (nameKey.includes('uk lotto')) {
+        countryClass = 'card-uk';
+    } else if (nameKey.includes('german lotto')) {
+        countryClass = 'card-germany';
+    } else if (nameKey.includes('french loto')) {
+        countryClass = 'card-france';
+    } else if (nameKey.includes('irish lotto')) {
+        countryClass = 'card-ireland';
+    } else if (nameKey.includes('swiss lotto')) {
+        countryClass = 'card-switzerland';
+    } else if (nameKey.includes('austrian lotto')) {
+        countryClass = 'card-austria';
+    }
+    
+    // Keep green border for positive ROI games
+    const borderOverride = isPositive ? 'style="border-top-color: #4caf50"' : '';
+    
     const wrapper = document.createElement("div");
     wrapper.innerHTML = `
-        <div class="card" style="border-top-color: ${borderColor}">
+        <div class="card ${countryClass}" ${borderOverride}>
             <img class="game-logo" src="${getGameImage(game.name)}" alt="${game.name} logo" />
             <!-- <h3>${game.name}</h3> -->
             <div class="jackpot">${game.currency}${(game.jackpot / 1000000).toFixed(1)}M</div>
