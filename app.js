@@ -37,10 +37,11 @@ const SORT_OPTIONS = [
 const LOGO_MAP = [
     { match: key => key.includes("eurojackpot"), label: "EUROJACKPOT", background: "#f1c40f", foreground: "#1c1c1c" },
     { match: key => key.includes("euromillions"), label: "EUROMILLIONS", background: "#1e88e5", foreground: "#ffd54f" },
+    { match: key => key.includes("superenalotto"), label: "SUPERENALOTTO", background: "#8e24aa", foreground: "#ffffff" },
     { match: key => key.includes("viking"), label: "VIKINGLOTTO", background: "#2196f3", foreground: "#ffffff" },
     { match: key => key.includes("powerball"), label: "POWERBALL", background: "#e53935", foreground: "#ffffff" },
     { match: key => key.includes("mega millions"), label: "MEGA MILLIONS", background: "#1565c0", foreground: "#ffffff" },
-    { match: key => key.includes("finnish lotto") || key.includes("lotto"), label: "FINNISH LOTTO", background: "#ef5350", foreground: "#ffffff" }
+    { match: key => key.includes("finnish lotto") || key === "lotto", label: "FINNISH LOTTO", background: "#ef5350", foreground: "#ffffff" }
 ];
 
 const state = {
@@ -126,11 +127,18 @@ function formatInternationalDateTime(dateTime) {
 }
 
 function makeLogo(label, background, foreground) {
+    const normalizedLabel = String(label || '');
+    const isLongLabel = normalizedLabel.length > 12;
+    const fontSize = isLongLabel ? 22 : 28;
+    const textLength = isLongLabel ? '200' : null;
+    const lengthAdjust = isLongLabel ? 'spacingAndGlyphs' : null;
+    const textLengthAttr = textLength ? `textLength="${textLength}"` : '';
+    const lengthAdjustAttr = lengthAdjust ? `lengthAdjust="${lengthAdjust}"` : '';
     const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" width="240" height="96" viewBox="0 0 240 96">
             <rect width="240" height="96" rx="16" fill="${background}"/>
-            <text x="120" y="58" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700" text-anchor="middle" fill="${foreground}">
-                ${label}
+            <text x="120" y="58" font-family="Segoe UI, Arial, sans-serif" font-size="${fontSize}" font-weight="700" text-anchor="middle" fill="${foreground}" ${textLengthAttr} ${lengthAdjustAttr}>
+                ${normalizedLabel}
             </text>
         </svg>
     `;
@@ -196,6 +204,7 @@ function buildCardNode({ game, metrics }) {
     const borderColor = isPositive ? '#4caf50' : (
         nameKey.includes('eurojackpot') ? '#e6b800' :
         nameKey.includes('euromillions') ? '#1e88e5' :
+        nameKey.includes('superenalotto') ? '#8e24aa' :
         nameKey.includes('powerball') ? '#e53935' :
         nameKey.includes('mega millions') ? '#1565c0' :
         nameKey.includes('viking') ? '#2196f3' :

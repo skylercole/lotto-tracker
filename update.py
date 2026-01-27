@@ -7,12 +7,14 @@ from datetime import datetime, timedelta
 # --- CONFIGURATION ---
 RTP_CONFIG = {
     "LOTTO": 0.23, "VIKING": 0.25, "EJACKPOT": 0.32,
-    "POWERBALL": 0.15, "MEGAMILLIONS": 0.15, "EUROMILLIONS": 0.20
+    "POWERBALL": 0.15, "MEGAMILLIONS": 0.15, "EUROMILLIONS": 0.20,
+    "SUPERENALOTTO": 0.60
 }
 
 ODDS_CONFIG = {
     "LOTTO": 18643560, "VIKING": 61357560, "EJACKPOT": 139838160,
-    "POWERBALL": 292201338, "MEGAMILLIONS": 302575350, "EUROMILLIONS": 139838160
+    "POWERBALL": 292201338, "MEGAMILLIONS": 302575350, "EUROMILLIONS": 139838160,
+    "SUPERENALOTTO": 622614630
 }
 
 NAMES = {
@@ -21,7 +23,8 @@ NAMES = {
     "EJACKPOT": "Eurojackpot",
     "POWERBALL": "US Powerball",
     "MEGAMILLIONS": "Mega Millions",
-    "EUROMILLIONS": "EuroMillions"
+    "EUROMILLIONS": "EuroMillions",
+    "SUPERENALOTTO": "SuperEnalotto"
 }
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -44,19 +47,30 @@ def _next_weekday_date(weekday_name):
     except Exception:
         return None
 
-def _next_euromillions_draw_date():
-    # EuroMillions draws on Tuesdays and Fridays
+def _next_multi_weekday_date(weekday_indices):
     try:
         today = datetime.now().date()
-        weekdays = {"tuesday": 1, "friday": 4}
         candidates = []
-        for name, target in weekdays.items():
+        for target in weekday_indices:
             delta = (target - today.weekday()) % 7
             if delta == 0:
                 delta = 7
             candidates.append(today + timedelta(days=delta))
-        next_date = min(candidates)
-        return next_date.strftime("%Y-%m-%d")
+        return min(candidates).strftime("%Y-%m-%d")
+    except Exception:
+        return None
+
+def _next_euromillions_draw_date():
+    # EuroMillions draws on Tuesdays and Fridays
+    try:
+        return _next_multi_weekday_date([1, 4])
+    except Exception:
+        return None
+
+def _next_superenalotto_draw_date():
+    # SuperEnalotto draws on Tue/Thu/Fri/Sat
+    try:
+        return _next_multi_weekday_date([1, 3, 4, 5])
     except Exception:
         return None
 
@@ -308,6 +322,87 @@ def scrape_euromillions():
         print(f"⚠️ EuroMillions Error: {e}")
         return None
 
+# --- 4. SUPERENALOTTO ---
+def scrape_superenalotto():
+    print("   Scraping SuperEnalotto from superenalotto.net...")
+    url = "https://www.superenalotto.net/en"
+    try:
+        resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=15)
+        soup = BeautifulSoup(resp.text, 'html.parser')
+
+        jackpot_val = 0
+        date_str = "Check Site"
+
+        full_text = soup.get_text(separator=" ", strip=True)
+
+        # 1. FIND JACKPOT
+        jackpot_match = re.search(
+            r'Estimated Jackpot\s+€\s?([0-9,.]+)\s*(Million|Billion)?',
+            full_text,
+            re.IGNORECASE
+        )
+        if jackpot_match:
+            amount_str = jackpot_match.group(1).replace(",", "")
+            try:
+                val = float(amount_str)
+                if jackpot_match.group(2):
+                    unit = jackpot_match.group(2).lower()
+                    if "billion" in unit:
+                        val *= 1_000_000_000
+                    elif "million" in unit:
+                        val *= 1_000_000
+                jackpot_val = val
+            except:
+                pass
+
+        if jackpot_val == 0:
+            matches = re.findall(r'€\s?([0-9,]+(\.[0-9]+)?)\s*(Million|Billion)?', full_text, re.IGNORECASE)
+            candidates = []
+            for m in matches:
+                amount_str = m[0].replace(",", "")
+                try:
+                    val = float(amount_str)
+                    if m[2]:
+                        unit = m[2].lower()
+                        if "billion" in unit:
+                            val *= 1_000_000_000
+                        elif "million" in unit:
+                            val *= 1_000_000
+                    if val >= 2_000_000:
+                        candidates.append(val)
+                except:
+                    continue
+            if candidates:
+                jackpot_val = max(candidates)
+
+        # 2. FIND DATE (fallback to schedule)
+        if date_str == "Check Site":
+            fallback_date = _next_superenalotto_draw_date()
+            if fallback_date:
+                date_str = fallback_date
+
+        if jackpot_val > 0:
+            return {
+                "name": NAMES["SUPERENALOTTO"],
+                "jackpot": jackpot_val,
+                "price": 1.00,
+                "next_draw": date_str,
+                "currency": "€",
+                "odds_jackpot": ODDS_CONFIG["SUPERENALOTTO"],
+                "base_rtp": RTP_CONFIG["SUPERENALOTTO"]
+            }
+
+        print("❌ SuperEnalotto: Could not find jackpot pattern.")
+        return None
+
+    except Exception as e:
+        print(f"⚠️ SuperEnalotto Error: {e}")
+        return None
+
+    except Exception as e:
+        print(f"⚠️ EuroMillions Error: {e}")
+        return None
+
 # --- MAIN RUNNER ---
 def update_database():
     games_list = []
@@ -328,6 +423,10 @@ def update_database():
     # 3. EUROMILLIONS
     em = scrape_euromillions()
     if em: games_list.append(em); print(f"✅ Success: EuroMillions ({em['jackpot']} - {em['next_draw']})")
+
+    # 4. SUPERENALOTTO
+    se = scrape_superenalotto()
+    if se: games_list.append(se); print(f"✅ Success: SuperEnalotto ({se['jackpot']} - {se['next_draw']})")
 
     # SAVE
     output = {

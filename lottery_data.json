@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-01-27 07:52:29",
+  "last_updated": "2026-01-27 11:25:42",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -54,6 +54,15 @@
       "currency": "\u20ac",
       "odds_jackpot": 139838160,
       "base_rtp": 0.2
+    },
+    {
+      "name": "SuperEnalotto",
+      "jackpot": 111600000.0,
+      "price": 1.0,
+      "next_draw": "2026-01-29",
+      "currency": "\u20ac",
+      "odds_jackpot": 622614630,
+      "base_rtp": 0.6
     }
   ]
 }
