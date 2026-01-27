@@ -42,6 +42,7 @@ const LOGO_MAP = [
     { match: key => key.includes("german lotto"), label: "GERMAN LOTTO", background: "#000000", foreground: "#ffcc00" },
     { match: key => key.includes("french loto"), label: "FRENCH LOTO", background: "#0055a4", foreground: "#ef4135" },
     { match: key => key.includes("irish lotto"), label: "IRISH LOTTO", background: "#169b62", foreground: "#ff883e" },
+    { match: key => key.includes("swiss lotto"), label: "SWISS LOTTO", background: "#ff0000", foreground: "#ffffff" },
     { match: key => key.includes("viking"), label: "VIKINGLOTTO", background: "#2196f3", foreground: "#ffffff" },
     { match: key => key.includes("powerball"), label: "POWERBALL", background: "#e53935", foreground: "#ffffff" },
     { match: key => key.includes("mega millions"), label: "MEGA MILLIONS", background: "#1565c0", foreground: "#ffffff" },
@@ -213,6 +214,7 @@ function buildCardNode({ game, metrics }) {
         nameKey.includes('german lotto') ? '#ffcc00' :
         nameKey.includes('french loto') ? '#0055a4' :
         nameKey.includes('irish lotto') ? '#169b62' :
+        nameKey.includes('swiss lotto') ? '#ff0000' :
         nameKey.includes('powerball') ? '#e53935' :
         nameKey.includes('mega millions') ? '#1565c0' :
         nameKey.includes('viking') ? '#2196f3' :

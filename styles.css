@@ -1,4 +1,36 @@
-:root { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --accent: #4caf50; --danger: #ef5350; }
+/* Dark mode (default) */
+:root {
+    color-scheme: light dark;
+    --bg: #121212;
+    --card: #1e1e1e;
+    --text: #e0e0e0;
+    --text-secondary: #888;
+    --text-muted: #555;
+    --border: #333;
+    --border-light: #2a2a2a;
+    --input-bg: #151515;
+    --tooltip-bg: #1b1b1b;
+    --accent: #4caf50;
+    --danger: #ef5350;
+}
+
+/* Light mode */
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg: #f5f5f5;
+        --card: #ffffff;
+        --text: #212121;
+        --text-secondary: #666;
+        --text-muted: #999;
+        --border: #e0e0e0;
+        --border-light: #f0f0f0;
+        --input-bg: #fafafa;
+        --tooltip-bg: #ffffff;
+        --accent: #4caf50;
+        --danger: #ef5350;
+    }
+}
+
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; text-align: center; }
 h1 { margin-bottom: 30px; letter-spacing: 1px; }
 .controls {
@@ -7,27 +39,27 @@ h1 { margin-bottom: 30px; letter-spacing: 1px; }
 }
 .control-group {
     display: flex; align-items: center; gap: 10px;
-    background: var(--card); border: 1px solid #2a2a2a; border-radius: 14px;
-    padding: 10px 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    background: var(--card); border: 1px solid var(--border-light); border-radius: 14px;
+    padding: 10px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
-.control-group label { color: #9e9e9e; font-size: 0.9rem; }
-.sort-indicator { color: #9e9e9e; font-size: 0.9rem; }
+.control-group label { color: var(--text-secondary); font-size: 0.9rem; }
+.sort-indicator { color: var(--text-secondary); font-size: 0.9rem; }
 .control-group select {
-    appearance: none; background: #151515; color: var(--text);
-    border: 1px solid #333; border-radius: 10px; padding: 8px 34px 8px 12px;
+    appearance: none; background: var(--input-bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 10px; padding: 8px 34px 8px 12px;
     font-size: 0.95rem; cursor: pointer; outline: none;
-    background-image: linear-gradient(45deg, transparent 50%, #888 50%), linear-gradient(135deg, #888 50%, transparent 50%);
+    background-image: linear-gradient(45deg, transparent 50%, var(--text-secondary) 50%), linear-gradient(135deg, var(--text-secondary) 50%, transparent 50%);
     background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%;
     background-size: 6px 6px, 6px 6px; background-repeat: no-repeat;
 }
-.control-group select:focus { border-color: #4caf50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15); }
+.control-group select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15); }
 .grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 1200px; margin: 0 auto; }
 .card { 
     background: var(--card); border-radius: 16px; padding: 25px; width: 300px; 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.2s; border-top: 5px solid #555;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; border-top: 5px solid var(--text-muted);
 }
-.card:hover { transform: translateY(-5px); }
-.jackpot { font-size: 2.2rem; font-weight: bold; margin: 15px 0; color: #fff; }
+.card:hover { transform: translateY(-5px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+.jackpot { font-size: 2.2rem; font-weight: bold; margin: 15px 0; color: var(--text); }
 .game-logo { width: 120px; height: 48px; object-fit: contain; margin: 0 auto 10px; display: block; }
 .roi-badge { 
     display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: bold; margin-bottom: 20px;
@@ -36,29 +68,36 @@ h1 { margin-bottom: 30px; letter-spacing: 1px; }
 .mid { background: rgba(255, 193, 7, 0.2); color: #ffd54f; border: 1px solid #ffca28; }
 .bad { background: rgba(244, 67, 54, 0.2); color: #ef5350; border: 1px solid #e57373; }
 
-.stat-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+/* Light mode adjustments for ROI badges */
+@media (prefers-color-scheme: light) {
+    .good { background: rgba(76, 175, 80, 0.15); color: #2e7d32; border: 1px solid #4caf50; }
+    .mid { background: rgba(255, 152, 0, 0.15); color: #ef6c00; border: 1px solid #ff9800; }
+    .bad { background: rgba(244, 67, 54, 0.15); color: #c62828; border: 1px solid #ef5350; }
+}
+
+.stat-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
 .stat-row:last-child { border: none; }
-.label { color: #888; }
+.label { color: var(--text-secondary); }
 .label-with-help { display: inline-flex; align-items: center; gap: 6px; }
 .help-button {
     width: 18px; height: 18px; border-radius: 50%;
-    border: 1px solid #444; background: #1a1a1a; color: #aaa;
+    border: 1px solid var(--border); background: var(--input-bg); color: var(--text-secondary);
     font-size: 12px; line-height: 16px; text-align: center;
     cursor: help; position: relative; padding: 0;
 }
-.help-button:hover, .help-button:focus { color: #fff; border-color: #666; }
+.help-button:hover, .help-button:focus { color: var(--text); border-color: var(--text-secondary); }
 .help-button::after {
     content: attr(data-tooltip);
     position: absolute; left: 50%; bottom: 28px; transform: translate(-50%, 6px);
     width: 240px; padding: 10px 12px; border-radius: 10px;
-    background: #1b1b1b; color: #e0e0e0; border: 1px solid #333;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    background: var(--tooltip-bg); color: var(--text); border: 1px solid var(--border);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     font-size: 0.8rem; line-height: 1.3; text-align: left;
     opacity: 0; pointer-events: none; transition: opacity 0.15s ease, transform 0.15s ease;
     z-index: 2;
 }
 .help-button:hover::after, .help-button:focus::after { opacity: 1; transform: translate(-50%, 0); }
-.timestamp { margin-top: 40px; color: #555; font-size: 0.8rem; }
-.footer { margin-top: 24px; font-size: 0.85rem; color: #666; }
-.footer a { color: #8ab4f8; text-decoration: none; }
+.timestamp { margin-top: 40px; color: var(--text-muted); font-size: 0.8rem; }
+.footer { margin-top: 24px; font-size: 0.85rem; color: var(--text-secondary); }
+.footer a { color: #1e88e5; text-decoration: none; }
 .footer a:hover { text-decoration: underline; }

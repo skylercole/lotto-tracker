@@ -1,8 +1,6 @@
 name: Update Lottery Data
 
 on:
-  schedule:
-    - cron: "43 * * * *"
   # Run on every push to main (Forces GitHub to see the file)
   push:
     branches:
