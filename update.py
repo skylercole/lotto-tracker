@@ -8,13 +8,13 @@ from datetime import datetime, timedelta
 RTP_CONFIG = {
     "LOTTO": 0.23, "VIKING": 0.25, "EJACKPOT": 0.32,
     "POWERBALL": 0.15, "MEGAMILLIONS": 0.15, "EUROMILLIONS": 0.20,
-    "SUPERENALOTTO": 0.60
+    "SUPERENALOTTO": 0.60, "UKLOTTO": 0.50
 }
 
 ODDS_CONFIG = {
     "LOTTO": 18643560, "VIKING": 61357560, "EJACKPOT": 139838160,
     "POWERBALL": 292201338, "MEGAMILLIONS": 302575350, "EUROMILLIONS": 139838160,
-    "SUPERENALOTTO": 622614630
+    "SUPERENALOTTO": 622614630, "UKLOTTO": 45057474
 }
 
 NAMES = {
@@ -24,7 +24,8 @@ NAMES = {
     "POWERBALL": "US Powerball",
     "MEGAMILLIONS": "Mega Millions",
     "EUROMILLIONS": "EuroMillions",
-    "SUPERENALOTTO": "SuperEnalotto"
+    "SUPERENALOTTO": "SuperEnalotto",
+    "UKLOTTO": "UK Lotto"
 }
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -71,6 +72,13 @@ def _next_superenalotto_draw_date():
     # SuperEnalotto draws on Tue/Thu/Fri/Sat
     try:
         return _next_multi_weekday_date([1, 3, 4, 5])
+    except Exception:
+        return None
+
+def _next_uklotto_draw_date():
+    # UK Lotto draws on Wed/Sat
+    try:
+        return _next_multi_weekday_date([2, 5])
     except Exception:
         return None
 
@@ -399,8 +407,76 @@ def scrape_superenalotto():
         print(f"⚠️ SuperEnalotto Error: {e}")
         return None
 
+# --- 5. UK LOTTO ---
+def scrape_uklotto():
+    print("   Scraping UK Lotto from national-lottery.co.uk...")
+    url = "https://www.national-lottery.co.uk"
+    try:
+        resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=15)
+        soup = BeautifulSoup(resp.text, 'html.parser')
+
+        jackpot_val = 0
+        date_str = "Check Site"
+
+        # 1. FIND JACKPOT - look for the card with Lotto jackpot
+        # Try to find by class name first
+        pot_spans = soup.find_all('span', class_=re.compile(r'potAmount'))
+        for span in pot_spans:
+            text = span.get_text(strip=True)
+            # Check if this is the Lotto card by looking at parent context
+            parent_text = span.find_parent().get_text(" ", strip=True).lower()
+            if 'lotto' in parent_text or 'it could be you' in parent_text:
+                match = re.search(r'£\s?([0-9,.]+)\s?M', text, re.IGNORECASE)
+                if match:
+                    try:
+                        val = float(match.group(1).replace(",", ""))
+                        jackpot_val = val * 1_000_000
+                        break
+                    except:
+                        pass
+
+        # Fallback: scan full page for Lotto section
+        if jackpot_val == 0:
+            full_text = soup.get_text(separator=" ", strip=True)
+            # Look for "Lotto" followed by jackpot within reasonable distance
+            lotto_idx = full_text.lower().find("this wednesday")
+            if lotto_idx == -1:
+                lotto_idx = full_text.lower().find("this saturday")
+            if lotto_idx == -1:
+                lotto_idx = full_text.lower().find("lotto")
+            
+            if lotto_idx != -1:
+                segment = full_text[lotto_idx:lotto_idx+500]
+                match = re.search(r'£\s?([0-9,.]+)\s?M', segment, re.IGNORECASE)
+                if match:
+                    try:
+                        val = float(match.group(1).replace(",", ""))
+                        jackpot_val = val * 1_000_000
+                    except:
+                        pass
+
+        # 2. FIND DATE (fallback to schedule)
+        if date_str == "Check Site":
+            fallback_date = _next_uklotto_draw_date()
+            if fallback_date:
+                date_str = fallback_date
+
+        if jackpot_val > 0:
+            return {
+                "name": NAMES["UKLOTTO"],
+                "jackpot": jackpot_val,
+                "price": 2.00,
+                "next_draw": date_str,
+                "currency": "£",
+                "odds_jackpot": ODDS_CONFIG["UKLOTTO"],
+                "base_rtp": RTP_CONFIG["UKLOTTO"]
+            }
+
+        print("❌ UK Lotto: Could not find jackpot pattern.")
+        return None
+
     except Exception as e:
-        print(f"⚠️ EuroMillions Error: {e}")
+        print(f"⚠️ UK Lotto Error: {e}")
         return None
 
 # --- MAIN RUNNER ---
@@ -427,6 +503,10 @@ def update_database():
     # 4. SUPERENALOTTO
     se = scrape_superenalotto()
     if se: games_list.append(se); print(f"✅ Success: SuperEnalotto ({se['jackpot']} - {se['next_draw']})")
+
+    # 5. UK LOTTO
+    uk = scrape_uklotto()
+    if uk: games_list.append(uk); print(f"✅ Success: UK Lotto ({uk['jackpot']} - {uk['next_draw']})")
 
     # SAVE
     output = {

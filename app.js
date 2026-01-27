@@ -38,6 +38,7 @@ const LOGO_MAP = [
     { match: key => key.includes("eurojackpot"), label: "EUROJACKPOT", background: "#f1c40f", foreground: "#1c1c1c" },
     { match: key => key.includes("euromillions"), label: "EUROMILLIONS", background: "#1e88e5", foreground: "#ffd54f" },
     { match: key => key.includes("superenalotto"), label: "SUPERENALOTTO", background: "#8e24aa", foreground: "#ffffff" },
+    { match: key => key.includes("uk lotto"), label: "UK LOTTO", background: "#d32f2f", foreground: "#ffffff" },
     { match: key => key.includes("viking"), label: "VIKINGLOTTO", background: "#2196f3", foreground: "#ffffff" },
     { match: key => key.includes("powerball"), label: "POWERBALL", background: "#e53935", foreground: "#ffffff" },
     { match: key => key.includes("mega millions"), label: "MEGA MILLIONS", background: "#1565c0", foreground: "#ffffff" },
@@ -205,6 +206,7 @@ function buildCardNode({ game, metrics }) {
         nameKey.includes('eurojackpot') ? '#e6b800' :
         nameKey.includes('euromillions') ? '#1e88e5' :
         nameKey.includes('superenalotto') ? '#8e24aa' :
+        nameKey.includes('uk lotto') ? '#d32f2f' :
         nameKey.includes('powerball') ? '#e53935' :
         nameKey.includes('mega millions') ? '#1565c0' :
         nameKey.includes('viking') ? '#2196f3' :
@@ -215,7 +217,7 @@ function buildCardNode({ game, metrics }) {
         <div class="card" style="border-top-color: ${borderColor}">
             <img class="game-logo" src="${getGameImage(game.name)}" alt="${game.name} logo" />
             <!-- <h3>${game.name}</h3> -->
-            <div class="jackpot">€${(game.jackpot / 1000000).toFixed(1)}M</div>
+            <div class="jackpot">${game.currency}${(game.jackpot / 1000000).toFixed(1)}M</div>
             <div class="roi-badge ${badgeClass}">
                 <span class="label-with-help">
                     Total ROI
@@ -243,7 +245,7 @@ function buildCardNode({ game, metrics }) {
             </div>
             <div class="stat-row">
                 <span class="label">Ticket Price</span>
-                <span>€${game.price.toFixed(2)}</span>
+                <span>${game.currency}${game.price.toFixed(2)}</span>
             </div>
             <div class="stat-row">
                 <span class="label">Next Draw</span>
