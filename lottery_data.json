@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-01-27 12:08:03",
+  "last_updated": "2026-01-27 12:12:35",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -89,6 +89,15 @@
       "next_draw": "2026-01-28",
       "currency": "\u20ac",
       "odds_jackpot": 19068840,
+      "base_rtp": 0.5
+    },
+    {
+      "name": "Irish Lotto",
+      "jackpot": 7500000.0,
+      "price": 2.0,
+      "next_draw": "2026-01-28",
+      "currency": "\u20ac",
+      "odds_jackpot": 10737573,
       "base_rtp": 0.5
     }
   ]

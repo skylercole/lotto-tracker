@@ -8,14 +8,15 @@ from datetime import datetime, timedelta
 RTP_CONFIG = {
     "LOTTO": 0.23, "VIKING": 0.25, "EJACKPOT": 0.32,
     "POWERBALL": 0.15, "MEGAMILLIONS": 0.15, "EUROMILLIONS": 0.20,
-    "SUPERENALOTTO": 0.60, "UKLOTTO": 0.50, "GERMANLOTTO": 0.50, "FRENCHLOTO": 0.50
+    "SUPERENALOTTO": 0.60, "UKLOTTO": 0.50, "GERMANLOTTO": 0.50, "FRENCHLOTO": 0.50,
+    "IRISHLOTTO": 0.50
 }
 
 ODDS_CONFIG = {
     "LOTTO": 18643560, "VIKING": 61357560, "EJACKPOT": 139838160,
     "POWERBALL": 292201338, "MEGAMILLIONS": 302575350, "EUROMILLIONS": 139838160,
     "SUPERENALOTTO": 622614630, "UKLOTTO": 45057474, "GERMANLOTTO": 139838160,
-    "FRENCHLOTO": 19068840
+    "FRENCHLOTO": 19068840, "IRISHLOTTO": 10737573
 }
 
 NAMES = {
@@ -28,7 +29,8 @@ NAMES = {
     "SUPERENALOTTO": "SuperEnalotto",
     "UKLOTTO": "UK Lotto",
     "GERMANLOTTO": "German Lotto",
-    "FRENCHLOTO": "French Loto"
+    "FRENCHLOTO": "French Loto",
+    "IRISHLOTTO": "Irish Lotto"
 }
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -96,6 +98,13 @@ def _next_frenchloto_draw_date():
     # French Loto draws on Mon/Wed/Sat
     try:
         return _next_multi_weekday_date([0, 2, 5])
+    except Exception:
+        return None
+
+def _next_irishlotto_draw_date():
+    # Irish Lotto draws on Wed/Sat
+    try:
+        return _next_multi_weekday_date([2, 5])
     except Exception:
         return None
 
@@ -605,6 +614,56 @@ def scrape_frenchloto():
         print(f"⚠️ French Loto Error: {e}")
         return None
 
+# --- 8. IRISH LOTTO ---
+def scrape_irishlotto():
+    print("   Scraping Irish Lotto from lottery.ie...")
+    url = "https://www.lottery.ie/draw-games/lotto"
+    try:
+        resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=15)
+        soup = BeautifulSoup(resp.text, 'html.parser')
+
+        jackpot_val = 0
+        date_str = "Check Site"
+
+        full_text = soup.get_text(separator=" ", strip=True)
+
+        # 1. FIND JACKPOT - look for "€X.X Million Jackpot" or "€X Million Jackpot"
+        jackpot_match = re.search(
+            r'€\s?([0-9,.]+)\s+Million\s+Jackpot',
+            full_text,
+            re.IGNORECASE
+        )
+        if jackpot_match:
+            try:
+                val = float(jackpot_match.group(1).replace(",", "."))
+                jackpot_val = val * 1_000_000
+            except:
+                pass
+
+        # 2. FIND DATE (fallback to schedule)
+        if date_str == "Check Site":
+            fallback_date = _next_irishlotto_draw_date()
+            if fallback_date:
+                date_str = fallback_date
+
+        if jackpot_val > 0:
+            return {
+                "name": NAMES["IRISHLOTTO"],
+                "jackpot": jackpot_val,
+                "price": 2.00,
+                "next_draw": date_str,
+                "currency": "€",
+                "odds_jackpot": ODDS_CONFIG["IRISHLOTTO"],
+                "base_rtp": RTP_CONFIG["IRISHLOTTO"]
+            }
+
+        print("❌ Irish Lotto: Could not find jackpot pattern.")
+        return None
+
+    except Exception as e:
+        print(f"⚠️ Irish Lotto Error: {e}")
+        return None
+
 # --- MAIN RUNNER ---
 def update_database():
     games_list = []
@@ -641,6 +700,10 @@ def update_database():
     # 7. FRENCH LOTO
     fl = scrape_frenchloto()
     if fl: games_list.append(fl); print(f"✅ Success: French Loto ({fl['jackpot']} - {fl['next_draw']})")
+
+    # 8. IRISH LOTTO
+    il = scrape_irishlotto()
+    if il: games_list.append(il); print(f"✅ Success: Irish Lotto ({il['jackpot']} - {il['next_draw']})")
 
     # SAVE
     output = {
