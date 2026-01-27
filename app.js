@@ -227,7 +227,7 @@ function buildCardNode({ game, metrics }) {
                         class="help-button"
                         type="button"
                         aria-label="Total ROI explained"
-                        data-tooltip="Expected total return (jackpot EV + base EV) as a percent of ticket price. 100% means break-even."
+                        data-tooltip="Total expected return per ticket spent. Calculated as: (Jackpot ÷ Odds of Winning + Ticket Price × RTP for smaller prizes) ÷ Ticket Price × 100%. Example: If you spend $100, an 80% ROI means you'd expect $80 back on average. 100% = break-even, >100% = positive expected value."
                     >?</button>
                 </span>
                 : ${metrics.totalROI}%
@@ -240,7 +240,7 @@ function buildCardNode({ game, metrics }) {
                         class="help-button"
                         type="button"
                         aria-label="Jackpot-only ROI explained"
-                        data-tooltip="Expected return from the jackpot tier only, ignoring smaller prizes, as a percent of ticket price."
+                        data-tooltip="Expected return from ONLY the jackpot prize, excluding all smaller prizes. Calculated as: (Jackpot Amount ÷ Odds of Winning Jackpot) ÷ Ticket Price × 100%. Example: $100M jackpot with 1-in-300M odds and $2 ticket = ($100M ÷ 300M) ÷ $2 × 100% = 16.7% ROI."
                     >?</button>
                 </span>
                 <span>${metrics.jackpotROI}%</span>
