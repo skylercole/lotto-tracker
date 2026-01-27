@@ -9,14 +9,15 @@ RTP_CONFIG = {
     "LOTTO": 0.23, "VIKING": 0.25, "EJACKPOT": 0.32,
     "POWERBALL": 0.15, "MEGAMILLIONS": 0.15, "EUROMILLIONS": 0.20,
     "SUPERENALOTTO": 0.60, "UKLOTTO": 0.50, "GERMANLOTTO": 0.50, "FRENCHLOTO": 0.50,
-    "IRISHLOTTO": 0.50, "SWISSLOTTO": 0.50
+    "IRISHLOTTO": 0.50, "SWISSLOTTO": 0.50, "AUSTRIANLOTTO": 0.50
 }
 
 ODDS_CONFIG = {
     "LOTTO": 18643560, "VIKING": 61357560, "EJACKPOT": 139838160,
     "POWERBALL": 292201338, "MEGAMILLIONS": 302575350, "EUROMILLIONS": 139838160,
     "SUPERENALOTTO": 622614630, "UKLOTTO": 45057474, "GERMANLOTTO": 139838160,
-    "FRENCHLOTO": 19068840, "IRISHLOTTO": 10737573, "SWISSLOTTO": 31474716
+    "FRENCHLOTO": 19068840, "IRISHLOTTO": 10737573, "SWISSLOTTO": 31474716,
+    "AUSTRIANLOTTO": 8145060
 }
 
 NAMES = {
@@ -31,7 +32,8 @@ NAMES = {
     "GERMANLOTTO": "German Lotto",
     "FRENCHLOTO": "French Loto",
     "IRISHLOTTO": "Irish Lotto",
-    "SWISSLOTTO": "Swiss Lotto"
+    "SWISSLOTTO": "Swiss Lotto",
+    "AUSTRIANLOTTO": "Austrian Lotto"
 }
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -113,6 +115,13 @@ def _next_swisslotto_draw_date():
     # Swiss Lotto draws on Wed/Sat
     try:
         return _next_multi_weekday_date([2, 5])
+    except Exception:
+        return None
+
+def _next_austrianlotto_draw_date():
+    # Austrian Lotto draws on Wed/Sun
+    try:
+        return _next_multi_weekday_date([2, 6])
     except Exception:
         return None
 
@@ -730,6 +739,58 @@ def scrape_swisslotto():
         print(f"⚠️ Swiss Lotto Error: {e}")
         return None
 
+# --- 10. AUSTRIAN LOTTO ---
+def scrape_austrianlotto():
+    print("   Scraping Austrian Lotto from lotterien.at API...")
+    url = "https://www.lotterien.at/api/jackpot/all"
+    try:
+        resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=15)
+        data = resp.json()
+
+        jackpot_val = 0
+        date_str = "Check Site"
+
+        # Extract lotto data from API
+        lotto_data = data.get('lotto', {})
+        jackpot_info = lotto_data.get('jackpot', {})
+        
+        # Get jackpot value (already in euros)
+        jackpot_val = jackpot_info.get('value', 0)
+
+        # Get draw time (Unix timestamp)
+        draw_time = lotto_data.get('drawTime')
+        if draw_time:
+            try:
+                from datetime import datetime
+                dt = datetime.fromtimestamp(draw_time)
+                date_str = dt.strftime('%Y-%m-%d')
+            except:
+                pass
+
+        # Fallback to schedule if date not found
+        if date_str == "Check Site":
+            fallback_date = _next_austrianlotto_draw_date()
+            if fallback_date:
+                date_str = fallback_date
+
+        if jackpot_val > 0:
+            return {
+                "name": NAMES["AUSTRIANLOTTO"],
+                "jackpot": jackpot_val,
+                "price": 1.50,
+                "next_draw": date_str,
+                "currency": "€",
+                "odds_jackpot": ODDS_CONFIG["AUSTRIANLOTTO"],
+                "base_rtp": RTP_CONFIG["AUSTRIANLOTTO"]
+            }
+
+        print("❌ Austrian Lotto: Could not find jackpot in API response.")
+        return None
+
+    except Exception as e:
+        print(f"⚠️ Austrian Lotto Error: {e}")
+        return None
+
 # --- MAIN RUNNER ---
 def update_database():
     games_list = []
@@ -774,6 +835,10 @@ def update_database():
     # 9. SWISS LOTTO
     sl = scrape_swisslotto()
     if sl: games_list.append(sl); print(f"✅ Success: Swiss Lotto ({sl['jackpot']} - {sl['next_draw']})")
+
+    # 10. AUSTRIAN LOTTO
+    al = scrape_austrianlotto()
+    if al: games_list.append(al); print(f"✅ Success: Austrian Lotto ({al['jackpot']} - {al['next_draw']})")
 
     # SAVE
     output = {
