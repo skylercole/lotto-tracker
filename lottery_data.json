@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-02 16:00:50",
+  "last_updated": "2026-02-03 04:01:07",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -29,49 +29,22 @@
       "base_rtp": 0.32
     },
     {
-      "name": "US Powerball",
-      "jackpot": 65000000.0,
-      "price": 2.0,
-      "next_draw": "2026-02-02",
-      "currency": "$",
-      "odds_jackpot": 292201338,
-      "base_rtp": 0.15
-    },
-    {
       "name": "Mega Millions",
       "jackpot": 323000000.0,
       "price": 2.0,
-      "next_draw": "2026-02-03",
+      "next_draw": "2026-02-04",
       "currency": "$",
       "odds_jackpot": 302575350,
       "base_rtp": 0.15
     },
     {
-      "name": "EuroMillions",
-      "jackpot": 17000000.0,
-      "price": 2.5,
-      "next_draw": "2026-02-03",
-      "currency": "\u20ac",
-      "odds_jackpot": 139838160,
-      "base_rtp": 0.2
-    },
-    {
       "name": "SuperEnalotto",
       "jackpot": 115000000.0,
       "price": 1.0,
-      "next_draw": "2026-02-03",
+      "next_draw": "2026-02-05",
       "currency": "\u20ac",
       "odds_jackpot": 622614630,
       "base_rtp": 0.6
-    },
-    {
-      "name": "UK Lotto",
-      "jackpot": 1000000.0,
-      "price": 2.0,
-      "next_draw": "2026-02-04",
-      "currency": "\u00a3",
-      "odds_jackpot": 45057474,
-      "base_rtp": 0.5
     },
     {
       "name": "German Lotto",
@@ -84,29 +57,11 @@
     },
     {
       "name": "French Loto",
-      "jackpot": 3000000.0,
+      "jackpot": 4000000.0,
       "price": 2.2,
       "next_draw": "2026-02-04",
       "currency": "\u20ac",
       "odds_jackpot": 19068840,
-      "base_rtp": 0.5
-    },
-    {
-      "name": "Irish Lotto",
-      "jackpot": 8500000.0,
-      "price": 2.0,
-      "next_draw": "2026-02-04",
-      "currency": "\u20ac",
-      "odds_jackpot": 10737573,
-      "base_rtp": 0.5
-    },
-    {
-      "name": "Swiss Lotto",
-      "jackpot": 8000000.0,
-      "price": 2.5,
-      "next_draw": "2026-02-04",
-      "currency": "CHF",
-      "odds_jackpot": 31474716,
       "base_rtp": 0.5
     },
     {
