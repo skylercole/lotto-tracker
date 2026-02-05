@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-05 16:00:46",
+  "last_updated": "2026-02-05 22:00:44",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -47,17 +47,8 @@
       "base_rtp": 0.15
     },
     {
-      "name": "EuroMillions",
-      "jackpot": 30000000.0,
-      "price": 2.5,
-      "next_draw": "2026-02-06",
-      "currency": "\u20ac",
-      "odds_jackpot": 139838160,
-      "base_rtp": 0.2
-    },
-    {
       "name": "SuperEnalotto",
-      "jackpot": 115900000.0,
+      "jackpot": 116600000.0,
       "price": 1.0,
       "next_draw": "2026-02-06",
       "currency": "\u20ac",
@@ -66,7 +57,7 @@
     },
     {
       "name": "UK Lotto",
-      "jackpot": 1000000.0,
+      "jackpot": 10300000.0,
       "price": 2.0,
       "next_draw": "2026-02-07",
       "currency": "\u00a3",
@@ -89,15 +80,6 @@
       "next_draw": "2026-02-07",
       "currency": "\u20ac",
       "odds_jackpot": 19068840,
-      "base_rtp": 0.5
-    },
-    {
-      "name": "Irish Lotto",
-      "jackpot": 8800000.0,
-      "price": 2.0,
-      "next_draw": "2026-02-07",
-      "currency": "\u20ac",
-      "odds_jackpot": 10737573,
       "base_rtp": 0.5
     },
     {
