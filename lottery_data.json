@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-03-18 16:00:55",
+  "last_updated": "2026-03-18 22:00:49",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -12,9 +12,9 @@
     },
     {
       "name": "Vikinglotto",
-      "jackpot": 3000000.0,
+      "jackpot": 4100000.0,
       "price": 1.0,
-      "next_draw": "2026-03-18",
+      "next_draw": "2026-03-25",
       "currency": "\u20ac",
       "odds_jackpot": 61357560,
       "base_rtp": 0.25
@@ -47,15 +47,6 @@
       "base_rtp": 0.15
     },
     {
-      "name": "EuroMillions",
-      "jackpot": 40000000.0,
-      "price": 2.5,
-      "next_draw": "2026-03-20",
-      "currency": "\u20ac",
-      "odds_jackpot": 139838160,
-      "base_rtp": 0.2
-    },
-    {
       "name": "SuperEnalotto",
       "jackpot": 136400000.0,
       "price": 1.0,
@@ -65,17 +56,17 @@
       "base_rtp": 0.6
     },
     {
-      "name": "German Lotto",
-      "jackpot": 38000000.0,
-      "price": 1.2,
+      "name": "UK Lotto",
+      "jackpot": 1000000.0,
+      "price": 2.0,
       "next_draw": "2026-03-21",
-      "currency": "\u20ac",
-      "odds_jackpot": 139838160,
+      "currency": "\u00a3",
+      "odds_jackpot": 45057474,
       "base_rtp": 0.5
     },
     {
       "name": "French Loto",
-      "jackpot": 4000000.0,
+      "jackpot": 5000000.0,
       "price": 2.2,
       "next_draw": "2026-03-21",
       "currency": "\u20ac",
@@ -83,30 +74,12 @@
       "base_rtp": 0.5
     },
     {
-      "name": "Irish Lotto",
-      "jackpot": 3800000.0,
-      "price": 2.0,
-      "next_draw": "2026-03-21",
-      "currency": "\u20ac",
-      "odds_jackpot": 10737573,
-      "base_rtp": 0.5
-    },
-    {
       "name": "Swiss Lotto",
-      "jackpot": 17700000.0,
+      "jackpot": 18600000.0,
       "price": 2.5,
       "next_draw": "2026-03-21",
       "currency": "CHF",
       "odds_jackpot": 31474716,
-      "base_rtp": 0.5
-    },
-    {
-      "name": "Austrian Lotto",
-      "jackpot": 1600000,
-      "price": 1.5,
-      "next_draw": "2026-03-18",
-      "currency": "\u20ac",
-      "odds_jackpot": 8145060,
       "base_rtp": 0.5
     }
   ]
