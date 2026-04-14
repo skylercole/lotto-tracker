@@ -40,7 +40,7 @@
     {
       "name": "Mega Millions",
       "jackpot": 120000000.0,
-      "price": 2.0,
+      "price": 5.0,
       "next_draw": "2026-04-14",
       "currency": "$",
       "odds_jackpot": 302575350,
