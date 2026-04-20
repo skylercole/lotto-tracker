@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-19 21:00:52",
+  "last_updated": "2026-04-20 03:00:59",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -32,7 +32,7 @@
       "name": "US Powerball",
       "jackpot": 87000000.0,
       "price": 2.0,
-      "next_draw": "2026-04-20",
+      "next_draw": "2026-04-21",
       "currency": "$",
       "odds_jackpot": 292201338,
       "base_rtp": 0.15
