@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-05-07 21:01:19",
+  "last_updated": "2026-05-08 03:01:18",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -41,19 +41,10 @@
       "name": "Mega Millions",
       "jackpot": 215000000.0,
       "price": 2.0,
-      "next_draw": "2026-05-08",
+      "next_draw": "2026-05-09",
       "currency": "$",
       "odds_jackpot": 302575350,
       "base_rtp": 0.15
-    },
-    {
-      "name": "UK Lotto",
-      "jackpot": 1000000.0,
-      "price": 2.0,
-      "next_draw": "2026-05-09",
-      "currency": "\u00a3",
-      "odds_jackpot": 45057474,
-      "base_rtp": 0.5
     },
     {
       "name": "Swiss Lotto",
