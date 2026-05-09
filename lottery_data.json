@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-05-08 21:00:59",
+  "last_updated": "2026-05-09 03:00:56",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -32,43 +32,25 @@
       "name": "US Powerball",
       "jackpot": 47000000.0,
       "price": 2.0,
-      "next_draw": "2026-05-09",
+      "next_draw": "2026-05-10",
       "currency": "$",
       "odds_jackpot": 292201338,
-      "base_rtp": 0.15
-    },
-    {
-      "name": "Mega Millions",
-      "jackpot": 215000000.0,
-      "price": 2.0,
-      "next_draw": "2026-05-08",
-      "currency": "$",
-      "odds_jackpot": 302575350,
       "base_rtp": 0.15
     },
     {
       "name": "SuperEnalotto",
       "jackpot": 162100000.0,
       "price": 1.0,
-      "next_draw": "2026-05-09",
+      "next_draw": "2026-05-12",
       "currency": "\u20ac",
       "odds_jackpot": 622614630,
       "base_rtp": 0.6
     },
     {
-      "name": "UK Lotto",
-      "jackpot": 3900000.0,
-      "price": 2.0,
-      "next_draw": "2026-05-09",
-      "currency": "\u00a3",
-      "odds_jackpot": 45057474,
-      "base_rtp": 0.5
-    },
-    {
       "name": "German Lotto",
       "jackpot": 36000000.0,
       "price": 1.2,
-      "next_draw": "2026-05-09",
+      "next_draw": "2026-05-13",
       "currency": "\u20ac",
       "odds_jackpot": 139838160,
       "base_rtp": 0.5
@@ -77,7 +59,7 @@
       "name": "Swiss Lotto",
       "jackpot": 7000000.0,
       "price": 2.5,
-      "next_draw": "2026-05-09",
+      "next_draw": "2026-05-13",
       "currency": "CHF",
       "odds_jackpot": 31474716,
       "base_rtp": 0.5
