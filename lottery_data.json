@@ -1,14 +1,32 @@
 {
-  "last_updated": "2026-06-06 21:00:54",
+  "last_updated": "2026-06-07 03:00:56",
   "games": [
     {
-      "name": "US Powerball",
-      "jackpot": 212000000.0,
+      "name": "Finnish Lotto",
+      "jackpot": 11500000.0,
+      "price": 1.0,
+      "next_draw": "2026-06-13",
+      "currency": "\u20ac",
+      "odds_jackpot": 18643560,
+      "base_rtp": 0.23
+    },
+    {
+      "name": "Vikinglotto",
+      "jackpot": 21000000.0,
+      "price": 1.0,
+      "next_draw": "2026-06-10",
+      "currency": "\u20ac",
+      "odds_jackpot": 61357560,
+      "base_rtp": 0.25
+    },
+    {
+      "name": "Eurojackpot",
+      "jackpot": 35000000.0,
       "price": 2.0,
-      "next_draw": "2026-06-06",
-      "currency": "$",
-      "odds_jackpot": 292201338,
-      "base_rtp": 0.15
+      "next_draw": "2026-06-09",
+      "currency": "\u20ac",
+      "odds_jackpot": 139838160,
+      "base_rtp": 0.32
     },
     {
       "name": "Mega Millions",
