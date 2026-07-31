@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-07-31 09:01:13",
+  "last_updated": "2026-07-31 15:01:20",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -98,15 +98,6 @@
       "next_draw": "2026-08-01",
       "currency": "CHF",
       "odds_jackpot": 31474716,
-      "base_rtp": 0.5
-    },
-    {
-      "name": "Austrian Lotto",
-      "jackpot": 1200000,
-      "price": 1.5,
-      "next_draw": "2026-08-01",
-      "currency": "\u20ac",
-      "odds_jackpot": 8145060,
       "base_rtp": 0.5
     }
   ]
