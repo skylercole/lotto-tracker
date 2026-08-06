@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-08-06 09:01:15",
+  "last_updated": "2026-08-06 15:01:39",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -56,30 +56,12 @@
       "base_rtp": 0.2
     },
     {
-      "name": "SuperEnalotto",
-      "jackpot": 205000000.0,
-      "price": 1.0,
-      "next_draw": "2026-08-07",
-      "currency": "\u20ac",
-      "odds_jackpot": 622614630,
-      "base_rtp": 0.6
-    },
-    {
       "name": "UK Lotto",
       "jackpot": 2000000.0,
       "price": 2.0,
       "next_draw": "2026-08-08",
       "currency": "\u00a3",
       "odds_jackpot": 45057474,
-      "base_rtp": 0.5
-    },
-    {
-      "name": "German Lotto",
-      "jackpot": 50000000.0,
-      "price": 1.2,
-      "next_draw": "2026-08-08",
-      "currency": "\u20ac",
-      "odds_jackpot": 139838160,
       "base_rtp": 0.5
     },
     {
@@ -98,6 +80,15 @@
       "next_draw": "2026-08-08",
       "currency": "CHF",
       "odds_jackpot": 31474716,
+      "base_rtp": 0.5
+    },
+    {
+      "name": "Austrian Lotto",
+      "jackpot": 2200000,
+      "price": 1.5,
+      "next_draw": "2026-08-06",
+      "currency": "\u20ac",
+      "odds_jackpot": 8145060,
       "base_rtp": 0.5
     }
   ]
