@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-08-22 21:01:11",
+  "last_updated": "2026-08-23 03:01:39",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -29,15 +29,6 @@
       "base_rtp": 0.32
     },
     {
-      "name": "US Powerball",
-      "jackpot": 68000000.0,
-      "price": 2.0,
-      "next_draw": "2026-08-22",
-      "currency": "$",
-      "odds_jackpot": 292201338,
-      "base_rtp": 0.15
-    },
-    {
       "name": "Mega Millions",
       "jackpot": 130000000.0,
       "price": 2.0,
@@ -45,15 +36,6 @@
       "currency": "$",
       "odds_jackpot": 302575350,
       "base_rtp": 0.15
-    },
-    {
-      "name": "SuperEnalotto",
-      "jackpot": 214100000.0,
-      "price": 1.0,
-      "next_draw": "2026-08-25",
-      "currency": "\u20ac",
-      "odds_jackpot": 622614630,
-      "base_rtp": 0.6
     },
     {
       "name": "Swiss Lotto",
