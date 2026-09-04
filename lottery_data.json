@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-09-03 21:01:47",
+  "last_updated": "2026-09-04 03:01:20",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -41,18 +41,27 @@
       "name": "Mega Millions",
       "jackpot": 177000000.0,
       "price": 2.0,
-      "next_draw": "2026-09-04",
+      "next_draw": "2026-09-05",
       "currency": "$",
       "odds_jackpot": 302575350,
       "base_rtp": 0.15
     },
     {
-      "name": "UK Lotto",
-      "jackpot": 6800000.0,
-      "price": 2.0,
+      "name": "SuperEnalotto",
+      "jackpot": 219500000.0,
+      "price": 1.0,
       "next_draw": "2026-09-05",
-      "currency": "\u00a3",
-      "odds_jackpot": 45057474,
+      "currency": "\u20ac",
+      "odds_jackpot": 622614630,
+      "base_rtp": 0.6
+    },
+    {
+      "name": "German Lotto",
+      "jackpot": 42000000.0,
+      "price": 1.2,
+      "next_draw": "2026-09-05",
+      "currency": "\u20ac",
+      "odds_jackpot": 139838160,
       "base_rtp": 0.5
     },
     {
