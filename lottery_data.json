@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-09-09 15:01:21",
+  "last_updated": "2026-09-09 21:01:54",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -12,9 +12,9 @@
     },
     {
       "name": "Vikinglotto",
-      "jackpot": 16000000.0,
+      "jackpot": 17000000.0,
       "price": 1.0,
-      "next_draw": "2026-09-09",
+      "next_draw": "2026-09-16",
       "currency": "\u20ac",
       "odds_jackpot": 61357560,
       "base_rtp": 0.25
@@ -47,53 +47,8 @@
       "base_rtp": 0.15
     },
     {
-      "name": "EuroMillions",
-      "jackpot": 110000000.0,
-      "price": 2.5,
-      "next_draw": "2026-09-11",
-      "currency": "\u20ac",
-      "odds_jackpot": 139838160,
-      "base_rtp": 0.2
-    },
-    {
-      "name": "SuperEnalotto",
-      "jackpot": 222400000.0,
-      "price": 1.0,
-      "next_draw": "2026-09-10",
-      "currency": "\u20ac",
-      "odds_jackpot": 622614630,
-      "base_rtp": 0.6
-    },
-    {
-      "name": "UK Lotto",
-      "jackpot": 107000000.0,
-      "price": 2.0,
-      "next_draw": "2026-09-12",
-      "currency": "\u00a3",
-      "odds_jackpot": 45057474,
-      "base_rtp": 0.5
-    },
-    {
-      "name": "German Lotto",
-      "jackpot": 45000000.0,
-      "price": 1.2,
-      "next_draw": "2026-09-12",
-      "currency": "\u20ac",
-      "odds_jackpot": 139838160,
-      "base_rtp": 0.5
-    },
-    {
-      "name": "Irish Lotto",
-      "jackpot": 2500000.0,
-      "price": 2.0,
-      "next_draw": "2026-09-12",
-      "currency": "\u20ac",
-      "odds_jackpot": 10737573,
-      "base_rtp": 0.5
-    },
-    {
       "name": "Swiss Lotto",
-      "jackpot": 25000000.0,
+      "jackpot": 25800000.0,
       "price": 2.5,
       "next_draw": "2026-09-12",
       "currency": "CHF",
@@ -102,9 +57,9 @@
     },
     {
       "name": "Austrian Lotto",
-      "jackpot": 8500000,
+      "jackpot": 11000000,
       "price": 1.5,
-      "next_draw": "2026-09-08",
+      "next_draw": "2026-09-12",
       "currency": "\u20ac",
       "odds_jackpot": 8145060,
       "base_rtp": 0.5
