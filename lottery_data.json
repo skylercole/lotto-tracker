@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-09-26 21:01:18",
+  "last_updated": "2026-09-27 03:01:16",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -27,6 +27,15 @@
       "currency": "\u20ac",
       "odds_jackpot": 139838160,
       "base_rtp": 0.32
+    },
+    {
+      "name": "Mega Millions",
+      "jackpot": 300000000.0,
+      "price": 2.0,
+      "next_draw": "2026-09-29",
+      "currency": "$",
+      "odds_jackpot": 302575350,
+      "base_rtp": 0.15
     },
     {
       "name": "SuperEnalotto",
