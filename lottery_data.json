@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-10-02 15:01:19",
+  "last_updated": "2026-10-02 21:01:48",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -21,9 +21,9 @@
     },
     {
       "name": "Eurojackpot",
-      "jackpot": 106000000.0,
+      "jackpot": 120000000.0,
       "price": 2.0,
-      "next_draw": "2026-10-02",
+      "next_draw": "2026-10-06",
       "currency": "\u20ac",
       "odds_jackpot": 139838160,
       "base_rtp": 0.32
@@ -47,48 +47,12 @@
       "base_rtp": 0.15
     },
     {
-      "name": "EuroMillions",
-      "jackpot": 30000000.0,
-      "price": 2.5,
-      "next_draw": "2026-10-06",
-      "currency": "\u20ac",
-      "odds_jackpot": 139838160,
-      "base_rtp": 0.2
-    },
-    {
-      "name": "SuperEnalotto",
-      "jackpot": 34800000.0,
-      "price": 1.0,
-      "next_draw": "2026-10-03",
-      "currency": "\u20ac",
-      "odds_jackpot": 622614630,
-      "base_rtp": 0.6
-    },
-    {
       "name": "UK Lotto",
       "jackpot": 227000000.0,
       "price": 2.0,
       "next_draw": "2026-10-03",
       "currency": "\u00a3",
       "odds_jackpot": 45057474,
-      "base_rtp": 0.5
-    },
-    {
-      "name": "German Lotto",
-      "jackpot": 4000000.0,
-      "price": 1.2,
-      "next_draw": "2026-10-03",
-      "currency": "\u20ac",
-      "odds_jackpot": 139838160,
-      "base_rtp": 0.5
-    },
-    {
-      "name": "Irish Lotto",
-      "jackpot": 5200000.0,
-      "price": 2.0,
-      "next_draw": "2026-10-03",
-      "currency": "\u20ac",
-      "odds_jackpot": 10737573,
       "base_rtp": 0.5
     },
     {
@@ -102,9 +66,9 @@
     },
     {
       "name": "Austrian Lotto",
-      "jackpot": 1300000,
+      "jackpot": 2000000,
       "price": 1.5,
-      "next_draw": "2026-10-01",
+      "next_draw": "2026-10-03",
       "currency": "\u20ac",
       "odds_jackpot": 8145060,
       "base_rtp": 0.5
