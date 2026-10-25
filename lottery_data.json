@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-10-25 16:01:41",
+  "last_updated": "2026-10-25 22:01:40",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -47,24 +47,6 @@
       "base_rtp": 0.15
     },
     {
-      "name": "EuroMillions",
-      "jackpot": 80000000.0,
-      "price": 2.5,
-      "next_draw": "2026-10-27",
-      "currency": "\u20ac",
-      "odds_jackpot": 139838160,
-      "base_rtp": 0.2
-    },
-    {
-      "name": "Irish Lotto",
-      "jackpot": 3600000.0,
-      "price": 2.0,
-      "next_draw": "2026-10-28",
-      "currency": "\u20ac",
-      "odds_jackpot": 10737573,
-      "base_rtp": 0.5
-    },
-    {
       "name": "Swiss Lotto",
       "jackpot": 38800000.0,
       "price": 2.5,
@@ -75,9 +57,9 @@
     },
     {
       "name": "Austrian Lotto",
-      "jackpot": 1400000,
+      "jackpot": 2100000,
       "price": 1.5,
-      "next_draw": "2026-10-24",
+      "next_draw": "2026-10-27",
       "currency": "\u20ac",
       "odds_jackpot": 8145060,
       "base_rtp": 0.5
