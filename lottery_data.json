@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-09 10:01:42",
+  "last_updated": "2026-11-09 16:01:12",
   "games": [
     {
       "name": "Finnish Lotto",
@@ -54,6 +54,24 @@
       "currency": "\u20ac",
       "odds_jackpot": 139838160,
       "base_rtp": 0.2
+    },
+    {
+      "name": "SuperEnalotto",
+      "jackpot": 100000000.0,
+      "price": 1.0,
+      "next_draw": "2026-11-10",
+      "currency": "\u20ac",
+      "odds_jackpot": 622614630,
+      "base_rtp": 0.6
+    },
+    {
+      "name": "German Lotto",
+      "jackpot": 4000000.0,
+      "price": 1.2,
+      "next_draw": "2026-11-11",
+      "currency": "\u20ac",
+      "odds_jackpot": 139838160,
+      "base_rtp": 0.5
     },
     {
       "name": "Irish Lotto",
